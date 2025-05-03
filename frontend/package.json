@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "esbuild": "0.25.3"
+  },
+  "dependencies": {
+    "big.js": "^7.0.1",
+    "bulma": "^1.0.4",
+    "jquery": "^3.7.1"
+  }
+}
