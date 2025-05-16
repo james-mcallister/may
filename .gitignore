@@ -121,3 +121,6 @@ tags
 # javascript
 node_modules
 dist
+
+# compiled binary directory
+bin/

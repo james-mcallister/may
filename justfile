@@ -3,14 +3,19 @@
 set shell := ["bash", "-uc"]
 
 VERSION := "0.0.1"
+export CGO_ENABLED := "1"
+export CC := "zig cc -target x86_64-linux-musl"
+export GOOS := "linux"
+export GOARCH := "amd64"
 
 # list available recipes
 default:
   @just --list
 
-# remove previously generated frontend assets
+# remove previously generated assets
 clean:
   rm -rf frontend/dist
+  rm -rf bin
 
 # create a github release
 release: tag
@@ -30,3 +35,7 @@ build-frontend: clean
   mkdir -p frontend/dist
   cp frontend/index.html frontend/favicon.ico frontend/dist/.
   ./frontend/node_modules/.bin/esbuild frontend/src/main.js --bundle --minify --outfile=./frontend/dist/assets/bundle.js
+
+# build the backend. Includes the frontend assets built into a production binary
+build: build-frontend
+  go build -tags "linux fts5 foreign_keys json" -ldflags "-s -w" -o ./bin/may main.go

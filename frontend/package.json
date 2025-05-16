@@ -3,6 +3,7 @@
     "esbuild": "0.25.3"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.4",
     "big.js": "^7.0.1",
     "bulma": "^1.0.4",
     "jquery": "^3.7.1"

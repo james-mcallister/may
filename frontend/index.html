@@ -4,12 +4,77 @@
         <meta charset="utf-8">
         <meta name="May" content="Staff Management App and EVMS tracker">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
         <link rel="stylesheet" type="text/css" href="/assets/bundle.css">
         <title>may</title>
     </head>
     <body>
-        <!-- app entrypoint -->
-        <div id="app"></div>
+        <nav class="navbar" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+              <a class="navbar-item" href="">
+                <svg data-logo="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 133 43" width="133" height="43">
+                  <g id="logogram" transform="translate(0, 1) rotate(0)">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M20.1666 0.782715C31.2119 0.782715 40.1669 9.73703 40.1669 20.7827C40.1669 31.8284 31.2119 40.7827 20.1666 40.7827C9.12093 40.7827 0.166626 31.8284 0.166626 20.7827C0.166626 9.73703 9.12093 0.782715 20.1666 0.782715ZM19.4437 2.2793C17.162 2.6004 14.9894 4.43379 13.3029 7.50011C12.8137 8.38954 12.3723 9.37218 11.9877 10.4332C14.2809 9.85689 16.8 9.51714 19.4437 9.46459V2.2793ZM10.2973 10.9135C10.7757 9.4123 11.3608 8.03111 12.0361 6.80336C12.8721 5.2833 13.8643 3.97066 14.9822 2.96248C8.90332 4.72794 4.11183 9.5195 2.34633 15.5984C3.35453 14.4805 4.66713 13.4883 6.18723 12.6523C7.41503 11.977 8.79613 11.3918 10.2973 10.9135ZM9.81702 12.6038C9.24072 14.897 8.90103 17.4161 8.84843 20.0598H1.66312C1.98422 17.7781 3.81763 15.6055 6.88403 13.9191C7.77343 13.4299 8.75602 12.9885 9.81702 12.6038ZM10.2945 20.0598C10.3542 17.1747 10.7696 14.4661 11.4568 12.0729C13.85 11.3857 16.5586 10.9703 19.4437 10.9106V14.0335C18.3674 16.7889 16.1722 18.9839 13.4167 20.0598H10.2945ZM8.84843 21.5056H1.66312C1.98422 23.7873 3.81763 25.9598 6.88403 27.6463C7.77343 28.1355 8.75602 28.5769 9.81702 28.9616C9.24072 26.6684 8.90103 24.1493 8.84843 21.5056ZM11.4568 29.4925C10.7696 27.0993 10.3542 24.3907 10.2945 21.5056H13.4167C16.1722 22.5815 18.3674 24.7765 19.4437 27.5319V30.6548C16.5586 30.5951 13.85 30.1797 11.4568 29.4925ZM10.2973 30.6519C8.79613 30.1736 7.41503 29.5884 6.18723 28.9131C4.66713 28.0771 3.35453 27.0849 2.34633 25.967C4.11183 32.0459 8.90332 36.8375 14.9822 38.6029C13.8643 37.5947 12.8721 36.2821 12.0361 34.762C11.3608 33.5343 10.7757 32.1531 10.2973 30.6519ZM19.4437 39.2861C17.162 38.965 14.9894 37.1316 13.3029 34.0653C12.8137 33.1759 12.3723 32.1932 11.9877 31.1323C14.2809 31.7085 16.8 32.0483 19.4437 32.1008V39.2861ZM25.3509 38.6029C26.4688 37.5947 27.4609 36.2821 28.2969 34.762C28.9719 33.5343 29.5579 32.1531 30.0359 30.6519C31.5369 30.1736 32.9179 29.5884 34.1459 28.9131C35.6659 28.0771 36.9789 27.0849 37.9869 25.967C36.2209 32.0459 31.4299 36.8375 25.3509 38.6029ZM28.3459 31.1323C27.9609 32.1932 27.5189 33.1759 27.0299 34.0653C25.3437 37.1316 23.1711 38.965 20.8894 39.2861V32.1008C23.5331 32.0483 26.0522 31.7085 28.3459 31.1323ZM30.5159 28.9616C31.5769 28.5769 32.5599 28.1355 33.4489 27.6463C36.5159 25.9599 38.3489 23.7873 38.6699 21.5056H31.4849C31.4319 24.1493 31.0919 26.6684 30.5159 28.9616ZM30.0389 21.5056C29.9789 24.3907 29.5639 27.0993 28.8759 29.4925C26.4831 30.1797 23.7745 30.5951 20.8894 30.6548V27.5342C21.9654 24.7778 24.1611 22.5818 26.9173 21.5056H30.0389ZM31.4849 20.0598H38.6699C38.3489 17.7781 36.5159 15.6055 33.4489 13.9191C32.5599 13.4299 31.5769 12.9885 30.5159 12.6038C31.0919 14.897 31.4319 17.4161 31.4849 20.0598ZM28.8759 12.0729C29.5639 14.4661 29.9789 17.1747 30.0389 20.0598H26.9174C24.1611 18.9836 21.9654 16.7876 20.8894 14.0312V10.9106C23.7745 10.9703 26.4831 11.3857 28.8759 12.0729ZM30.0359 10.9135C31.5369 11.3918 32.9179 11.977 34.1459 12.6523C35.6659 13.4883 36.9789 14.4805 37.9869 15.5984C36.2209 9.5195 31.4299 4.72794 25.3509 2.96248C26.4688 3.97066 27.4609 5.2833 28.2969 6.80336C28.9719 8.03111 29.5579 9.4123 30.0359 10.9135ZM20.8894 2.2793C23.1711 2.6004 25.3437 4.43379 27.0299 7.50011C27.5189 8.38955 27.9609 9.37218 28.3459 10.4332C26.0522 9.85689 23.5331 9.51714 20.8894 9.46459V2.2793Z" fill="#000000" />
+                  </g>
+                  <g id="logotype" transform="translate(47, 2)">
+                    <path fill="#111111" d="M14.09 29L8.17 29L8.17 9.47L14.09 9.47L14.09 13.63Q14.51 12.27 15.43 11.29Q16.36 10.31 17.60 9.77Q18.84 9.22 20.14 9.22L20.14 9.22Q22.80 9.22 24.50 10.76Q26.20 12.30 26.58 15.03L26.58 15.03Q26.97 13.11 27.98 11.83Q29.00 10.55 30.41 9.89Q31.83 9.22 33.44 9.22L33.44 9.22Q37.05 9.22 39.02 11.43Q41 13.63 41 17.55L41 17.55L41 29L35.12 29L35.12 18.46Q35.12 16.47 34.09 15.31Q33.06 14.16 31.34 14.16L31.34 14.16Q29.63 14.16 28.59 15.49Q27.56 16.82 27.56 18.81L27.56 18.81L27.56 29L21.65 29L21.65 18.46Q21.65 16.47 20.63 15.31Q19.62 14.16 17.90 14.16L17.90 14.16Q16.75 14.16 15.91 14.77Q15.07 15.38 14.58 16.43Q14.09 17.48 14.09 18.81L14.09 18.81L14.09 29ZM51.22 29.25L51.22 29.25Q48.66 29.25 46.76 27.91Q44.85 26.59 43.82 24.33Q42.78 22.07 42.78 19.23L42.78 19.23Q42.78 16.43 43.82 14.16Q44.85 11.88 46.76 10.55Q48.66 9.22 51.22 9.22L51.22 9.22Q53.46 9.22 55.12 10.43Q56.79 11.64 57.45 13.81L57.45 13.81L57.45 9.47L63.37 9.47L63.37 29L60.46 29Q59.06 29 58.26 28.21Q57.45 27.43 57.45 26.02L57.45 26.02L57.45 24.70Q56.79 26.83 55.12 28.04Q53.46 29.25 51.22 29.25ZM53.15 24.06L53.15 24.06Q54.30 24.06 55.28 23.50Q56.26 22.95 56.86 21.86Q57.45 20.77 57.45 19.23L57.45 19.23Q57.45 17.73 56.86 16.64Q56.26 15.56 55.28 14.96Q54.30 14.37 53.15 14.37L53.15 14.37Q51.95 14.37 50.98 14.96Q50.00 15.56 49.42 16.64Q48.84 17.73 48.84 19.23L48.84 19.23Q48.84 20.77 49.42 21.86Q50.00 22.95 50.99 23.50Q51.99 24.06 53.15 24.06ZM79.33 28.34L79.33 28.34L79.33 9.47L85.20 9.47L85.20 28.34Q85.20 30.33 84.61 32.15Q84.02 33.97 82.77 35.41Q81.53 36.84 79.61 37.68Q77.68 38.52 74.98 38.52L74.98 38.52Q72.64 38.52 70.66 37.77Q68.69 37.02 67.27 35.53Q65.85 34.04 65.15 31.94L65.15 31.94L70.30 30.19Q70.86 31.59 71.96 32.52Q73.06 33.45 74.74 33.45L74.74 33.45Q76.98 33.45 78.15 32.06Q79.33 30.68 79.33 28.34ZM79.33 19.23L80.03 19.93Q79.99 22.66 79.41 24.41Q78.84 26.16 77.91 27.13Q76.98 28.09 75.86 28.48Q74.74 28.86 73.58 28.86L73.58 28.86Q71.34 28.86 69.61 27.83Q67.88 26.80 66.92 24.89Q65.95 22.98 65.95 20.39L65.95 20.39L65.95 9.47L71.80 9.47L71.80 19.59Q71.80 21.61 72.81 22.73Q73.83 23.86 75.55 23.86L75.55 23.86Q76.73 23.86 77.58 23.26Q78.42 22.66 78.87 21.63Q79.33 20.60 79.33 19.23L79.33 19.23Z" />
+                  </g>
+                </svg>
+              </a>
+            </div>
+            <div class="navbar-menu">
+              <div class="navbar-start">
+                <!-- Home page has tasks and reminders-->
+                <a class="navbar-item" href="/home/">Home</a>
+                <div class="navbar-item has-dropdown is-hoverable">
+                  <a class="navbar-link">Update</a>
+                  <div class="navbar-dropdown">
+                    <!-- Forms to manage add/update/delete entities-->
+                    <a class="navbar-item" href="/employee/">Employee</a>
+                    <a class="navbar-item" href="/network/">Network</a>
+                    <a class="navbar-item" href="/project/">Project</a>
+                    <a class="navbar-item" href="/calendar/">Calendar</a>
+                    <a class="navbar-item" href="/compensation/">Compensation</a>
+                    <a class="navbar-item" href="/ipt/">IPT</a>
+                    <!-- This should be discrete tasks need to associate with an ETC and a Project similar to Labor-->
+                    <a class="navbar-item" href="/material/">Material</a>
+                  </div>
+                </div>
+                <div class="navbar-item has-dropdown is-hoverable">
+                  <a class="navbar-link">EVMS</a>
+                  <div class="navbar-dropdown">
+                    <a class="navbar-item" href="/laborplan/">Labor Planning</a>
+                    <a class="navbar-item" href="/material/status/">Material Status</a>
+                    <!-- 2 dropdown form to associate an employee with a network-->
+                    <a class="navbar-item" href="/lca/">LCA</a>
+                    <!-- Form to fill in CAP values -->
+                    <a class="navbar-item" href="/baseline/">Add Baseline</a>
+                    <!-- Not sure if we need this or just have the reports-->
+                    <a class="navbar-item" href="/metrics/">Metrics</a>
+                  </div>
+                </div>
+                <div class="navbar-item has-dropdown is-hoverable">
+                  <a class="navbar-link">FHR</a>
+                  <div class="navbar-dropdown">
+                    <!-- List of DRs with their MyIDs and any other summary information-->
+                    <a class="navbar-item" href="/fhr/direct-reports">Direct Reports</a>
+                    <!-- Text boxes for 1 on 1 notes, action items and TODOs. Might need a submenu here for multiple views -->
+                    <a class="navbar-item" href="/fhr/1on1/">1 on 1s</a>
+                    <!-- FHR tracker metrics and personal notes for QC self evaluations-->
+                    <a class="navbar-item" href="/fhr/career/">Career</a>
+                  </div>
+                </div>
+                <a class="navbar-item" href="/reports/">Reports</a>
+              </div>
+              <div class="navbar-end">
+                <!-- Need a file upload form and then column mapping form-->
+                <a class="navbar-item" href="/import/">Import</a>
+                <!-- Not sure if I need a sign in but should consider multi tenancy from the start-->
+                <a class="navbar-item" href="/signin/">Sign In</a>
+              </div>
+            </div>
+          </nav>
+        <div id="app" class="container"></div>
         <script type="module" src="/assets/bundle.js"></script>
     </body>
 </html>
