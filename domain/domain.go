@@ -27,3 +27,11 @@ func (d Domain) Init() {
 		panic(err)
 	}
 }
+
+type Form interface {
+	Get(int64) any
+	All() []any
+	New() (int64, error)
+	Update(int64) (int64, error)
+	Delete(int64) (int64, error)
+}

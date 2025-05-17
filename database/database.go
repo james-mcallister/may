@@ -60,6 +60,7 @@ func InitDB(db *sql.DB) error {
 		Employee{},
 		Project{},
 		Network{},
+		Material{},
 	}
 
 	for _, t := range tables {

@@ -32,7 +32,7 @@ func NewMaterial() Material {
 func (e Material) Init(db *sql.DB) error {
 	tableQuery := `
 	CREATE TABLE IF NOT EXISTS Material (
-	    id INTEGER PRIMARY KEY,
+		id INTEGER PRIMARY KEY,
 		name TEXT NOT NULL,
 		estimated_cost NUMERIC DEFAULT 0.0,
 		actual_cost NUMERIC DEFAULT 0.0,

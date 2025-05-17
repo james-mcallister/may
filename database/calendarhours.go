@@ -14,7 +14,7 @@ type CalendarHours struct {
 func (ch CalendarHours) Init(db *sql.DB) error {
 	tableQuery := `
 	CREATE TABLE IF NOT EXISTS CalendarHours (
-	    id INTEGER PRIMARY KEY,
+		id INTEGER PRIMARY KEY,
 		cal_date TEXT UNIQUE NOT NULL,
 		description TEXT DEFAULT '',
 		fiscal_year INTEGER,

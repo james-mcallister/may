@@ -18,7 +18,7 @@ func NewCalendar() Calendar {
 func (c Calendar) Init(db *sql.DB) error {
 	tableQuery := `
 	CREATE TABLE IF NOT EXISTS Calendar (
-	    id INTEGER PRIMARY KEY,
+		id INTEGER PRIMARY KEY,
 		name TEXT UNIQUE NOT NULL,
 		description TEXT DEFAULT ''
 	);

@@ -29,7 +29,7 @@ func NewEmployee() Employee {
 func (e Employee) Init(db *sql.DB) error {
 	tableQuery := `
 	CREATE TABLE IF NOT EXISTS Employee (
-	    id INTEGER PRIMARY KEY,
+		id INTEGER PRIMARY KEY,
 		first_name TEXT DEFAULT '',
 		last_name TEXT DEFAULT '',
 		display_name TEXT DEFAULT '',

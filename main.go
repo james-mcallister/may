@@ -31,6 +31,18 @@ func home(arg string) http.HandlerFunc {
 	})
 }
 
+func initRoutes(mux *http.ServeMux, log *log.Logger, d domain.Domain) {
+	middlewareLog := Logger(log)
+
+	mux.Handle("GET /home/", middlewareLog(home("Test")))
+
+	mux.Handle("GET /employees/", middlewareLog(home("Test")))
+	mux.Handle("POST /employees/", middlewareLog(home("Test")))
+	mux.Handle("GET /employees/{id}", middlewareLog(home("Test")))
+	mux.Handle("PUT /employees/{id}", middlewareLog(home("Test")))
+	mux.Handle("DELETE /employees/{id}", middlewareLog(home("Test")))
+}
+
 func main() {
 	d := domain.NewDomain()
 	d.Init()
@@ -47,6 +59,7 @@ func main() {
 	middlewareLog := Logger(logger)
 
 	mux.Handle("GET /", middlewareLog(staticFiles))
+	initRoutes(mux, logger, d)
 
 	// TODO: configurable options
 	srv := &http.Server{
