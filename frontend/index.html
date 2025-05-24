@@ -39,56 +39,74 @@
             <div class="navbar-menu">
                 <div class="navbar-start">
                     <!-- Home page has tasks and reminders-->
-                    <a class="navbar-item" href="/home/">Home</a>
+                    <a class="navbar-item" data-handler="home" href="home">Home</a>
                     <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link">Update</a>
+                        <a class="navbar-link" href="">Update</a>
                         <div class="navbar-dropdown">
                             <!-- Forms to manage add/update/delete entities-->
-                            <a class="navbar-item" href="/employees/">Employee</a>
-                            <a class="navbar-item" href="/networks/">Network</a>
-                            <a class="navbar-item" href="/projects/">Project</a>
-                            <a class="navbar-item" href="/calendars/">Calendar</a>
-                            <a class="navbar-item" href="/compensation/">Compensation</a>
-                            <a class="navbar-item" href="/ipts/">IPT</a>
+                            <a class="navbar-item" data-handler="entity" href="employees">Employee</a>
+                            <a class="navbar-item" data-handler="entity" href="networks">Network</a>
+                            <a class="navbar-item" data-handler="entity" href="projects">Project</a>
+                            <a class="navbar-item" data-handler="entity" href="calendars">Calendar</a>
+                            <a class="navbar-item" data-handler="entity" href="compensation">Compensation</a>
+                            <a class="navbar-item" data-handler="entity" href="ipts">IPT</a>
                             <!-- This should be discrete tasks need to associate with an ETC and a Project similar to Labor-->
-                            <a class="navbar-item" href="/material/">Material</a>
+                            <a class="navbar-item" data-handler="entity" href="material">Material</a>
                         </div>
                     </div>
                     <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link">EVMS</a>
+                        <a class="navbar-link" href="">EVMS</a>
                         <div class="navbar-dropdown">
-                            <a class="navbar-item" href="/laborplan/">Labor Planning</a>
-                            <a class="navbar-item" href="/material/status/">Material Status</a>
+                            <a class="navbar-item" href="laborplan">Labor Planning</a>
+                            <a class="navbar-item" href="material/status">Material Status</a>
                             <!-- 2 dropdown form to associate an employee with a network-->
-                            <a class="navbar-item" href="/lca/">LCA</a>
+                            <a class="navbar-item" href="lca">LCA</a>
                             <!-- Form to fill in CAP values -->
-                            <a class="navbar-item" href="/baseline/">Add Baseline</a>
+                            <a class="navbar-item" href="baseline">Add Baseline</a>
                             <!-- Not sure if we need this or just have the reports-->
-                            <a class="navbar-item" href="/metrics/">Metrics</a>
+                            <a class="navbar-item" href="metrics">Metrics</a>
                         </div>
                     </div>
                     <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link">FHR</a>
+                        <a class="navbar-link" href="">FHR</a>
                         <div class="navbar-dropdown">
                             <!-- List of DRs with their MyIDs and any other summary information-->
-                            <a class="navbar-item" href="/fhr/direct-reports">Direct Reports</a>
+                            <a class="navbar-item" href="fhr/direct-reports">Direct Reports</a>
                             <!-- Text boxes for 1 on 1 notes, action items and TODOs. Might need a submenu here for multiple views -->
-                            <a class="navbar-item" href="/fhr/1on1/">1 on 1s</a>
+                            <a class="navbar-item" href="fhr/1on1">1 on 1s</a>
                             <!-- FHR tracker metrics and personal notes for QC self evaluations-->
-                            <a class="navbar-item" href="/fhr/career/">Career</a>
+                            <a class="navbar-item" href="fhr/career">Career</a>
                         </div>
                     </div>
-                    <a class="navbar-item" href="/reports/">Reports</a>
+                    <a class="navbar-item" href="reports">Reports</a>
                 </div>
                 <div class="navbar-end">
                     <!-- Need a file upload form and then column mapping form-->
-                    <a class="navbar-item" href="/import/">Import</a>
+                    <a class="navbar-item" href="import">Import</a>
                     <!-- Not sure if I need a sign in but should consider multi tenancy from the start-->
-                    <a class="navbar-item" href="/signin/">Sign In</a>
+                    <a class="navbar-item" href="signin">Sign In</a>
                 </div>
             </div>
         </nav>
+        <div id="notification" class="block is-hidden" style="position: fixed; z-index: 1000; top: 2.5rem; right: 0; padding: 1rem; width: 25%;"></div>
         <div id="app" class="container"></div>
+        <div id="modal-confirm" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p>Confirm Delete</p>
+                </header>
+                <section class="modal-card-body">
+                    <p>Are you sure you want to delete?</p>
+                </section>
+                <footer class="modal-card-foot">
+                    <div class="buttons">
+                        <button id="btn-modal-confirm" class="button is-success">Confirm</button>
+                        <button id="btn-modal-cancel" class="button">Cancel</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
         <script type="module" src="/assets/bundle.js"></script>
     </body>
 </html>

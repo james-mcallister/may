@@ -1,0 +1,63 @@
+<div class="block">
+    <p class="title is-3">Update Employee</p>
+    <p class="subtitle is-5">Select employee to update</p>
+</div>
+<div class="block">
+    <div class="field">
+    <div class="control">
+        <a id="btn-new" class="button is-link" href="employees">Add New</a>
+    </div>
+    </div>
+    <div class="field">
+        <p class="control has-icons-left">
+            <input id="search-input" class="input" type="text" placeholder="Search" />
+            <span class="icon is-small is-left">
+                <i class="fas fa-search"></i>
+            </span>
+        </p>
+    </div>
+</div>
+<div class="block">
+    <div class="table-container">
+        <table class="table is-bordered is-striped is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Display Name</th>
+                    <th>My ID</th>
+                    <th>Employee ID</th>
+                    <th>Labor Capacity</th>
+                    <th>Desk</th>
+                    <th>Active</th>
+                    <th>Coverage Start</th>
+                    <th>Coverage End</th>
+                    <th>Compensation ID</th>
+                    <th>IPT ID</th>
+                    <th>Manager ID</th>
+                </tr>
+            </thead>
+            <tbody data-handler="form">
+                {{ range .Emps }}
+                <tr>
+                    <td>{{ .Id }}</td>
+                    <td>{{ .FirstName }}</td>
+                    <td>{{ .LastName }}</td>
+                    <td>{{ .DisplayName }}</td>
+                    <td>{{ .Myid }}</td>
+                    <td>{{ .Empid }}</td>
+                    <td>{{ .LaborCapacity }}</td>
+                    <td>{{ .Desk }}</td>
+                    <td>{{ .Active }}</td>
+                    <td>{{ .CoverageStart }}</td>
+                    <td>{{ .CoverageEnd }}</td>
+                    <td>{{ .Comp }}</td>
+                    <td>{{ .Ipt }}</td>
+                    <td>{{ .Manager }}</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -36,6 +36,12 @@ build-frontend: clean
   cp frontend/index.html frontend/favicon.ico frontend/dist/.
   ./frontend/node_modules/.bin/esbuild frontend/src/main.js --bundle --minify --outfile=./frontend/dist/assets/bundle.js
 
+# build frontend using eslint updating assets directory
+build-frontend-dev: clean
+  mkdir -p frontend/dist
+  cp frontend/index.html frontend/favicon.ico frontend/dist/.
+  ./frontend/node_modules/.bin/esbuild frontend/src/main.js --bundle --outfile=./frontend/dist/assets/bundle.js
+
 # build the backend. Includes the frontend assets built into a production binary
-build: build-frontend
-  go build -tags "linux fts5 foreign_keys json" -ldflags "-s -w" -o ./bin/may main.go
+build: build-frontend-dev
+  go build -tags "linux fts5 foreign_keys json" -ldflags "-s -w" -o ./bin/may main.go domain.go

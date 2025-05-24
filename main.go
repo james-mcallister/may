@@ -3,49 +3,26 @@ package main
 import (
 	"context"
 	"embed"
+	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/james-mcallister/may/domain"
 )
 
 //go:embed frontend/dist/*
 var static embed.FS
 
-func Logger(log *log.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("%s %s", r.Method, r.URL)
-			next.ServeHTTP(w, r)
-		})
-	}
-}
-
-func home(arg string) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("<h1>Home Page - " + arg + "</h1>"))
-	})
-}
-
-func initRoutes(mux *http.ServeMux, log *log.Logger, d domain.Domain) {
-	middlewareLog := Logger(log)
-
-	mux.Handle("GET /home/", middlewareLog(home("Test")))
-
-	mux.Handle("GET /employees/", middlewareLog(home("Test")))
-	mux.Handle("POST /employees/", middlewareLog(home("Test")))
-	mux.Handle("GET /employees/{id}", middlewareLog(home("Test")))
-	mux.Handle("PUT /employees/{id}", middlewareLog(home("Test")))
-	mux.Handle("DELETE /employees/{id}", middlewareLog(home("Test")))
-}
+//go:embed templates/*
+var templ embed.FS
 
 func main() {
-	d := domain.NewDomain()
+	d := NewDomain()
 	d.Init()
+
+	d.Templates = template.Must(template.ParseFS(templ, "templates/*.html"))
 
 	fsys, err := fs.Sub(static, "frontend/dist")
 	if err != nil {
@@ -54,12 +31,13 @@ func main() {
 	staticFiles := http.FileServerFS(fsys)
 
 	logger := log.New(os.Stdout, "may:", log.LstdFlags|log.Lshortfile)
-
-	mux := http.NewServeMux()
 	middlewareLog := Logger(logger)
 
+	mux := http.NewServeMux()
 	mux.Handle("GET /", middlewareLog(staticFiles))
-	initRoutes(mux, logger, d)
+	if err := initRoutes(mux, logger, d); err != nil {
+		panic(err)
+	}
 
 	// TODO: configurable options
 	srv := &http.Server{

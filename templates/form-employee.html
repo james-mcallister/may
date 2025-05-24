@@ -1,27 +1,3 @@
-package forms
-
-import (
-	"fmt"
-	"html/template"
-
-	"github.com/james-mcallister/may/database"
-)
-
-// init template and any persistent data
-type EmployeeForm struct {
-	template *template.Template
-}
-
-// data to use in the template.Execute method. Called every request
-type EmployeeFormData struct {
-	Emp          database.Employee
-	EmpDropdown  database.Dropdown
-	IptDropdown  database.Dropdown
-	CompDropdown database.Dropdown
-}
-
-func (f *EmployeeForm) InitTemplate() error {
-	markup := `
 <div class="block mt-1">
     <form>
         <fieldset>
@@ -29,7 +5,7 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field">
                 <label class="label">ID</label>
                 <div class="control">
-                    <input class="input" type="text" value="{{ .Emp.Id }}" disabled />
+                    <input id="entity-id" name="id" class="input" type="text" value="{{ .Emp.Id }}" disabled />
                 </div>
                 <p class="help">ID is managed by the database</p>
             </div>
@@ -37,7 +13,7 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field">
                 <label class="label">My ID</label>
                 <div class="control">
-                    <input class="input" type="text" value="{{ .Emp.Myid }}" />
+                    <input name="myid" class="input" type="text" value="{{ .Emp.Myid }}" required/>
                 </div>
                 <p class="help">Required Field (ex: m33445)</p>
             </div>
@@ -45,7 +21,7 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field">
                 <label class="label">First Name</label>
                 <div class="control">
-                    <input class="input" type="text" value="{{ .Emp.FirstName }}" />
+                    <input name="first_name" class="input" type="text" value="{{ .Emp.FirstName }}" />
                 </div>
                 <p class="help"></p>
             </div>
@@ -53,7 +29,7 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field">
                 <label class="label">Last Name</label>
                 <div class="control">
-                    <input class="input" type="text" value="{{ .Emp.LastName }}" />
+                    <input name="last_name" class="input" type="text" value="{{ .Emp.LastName }}" />
                 </div>
                 <p class="help"></p>
             </div>
@@ -61,7 +37,7 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field">
                 <label class="label">Employee ID</label>
                 <div class="control">
-                    <input class="input" type="text" value="{{ .Emp.Empid }}" />
+                    <input name="empid" class="input" type="text" value="{{ .Emp.Empid }}" />
                 </div>
                 <p class="help">From workday or COBRA (ex: 1002456 or mcallja)</p>
             </div>
@@ -69,7 +45,7 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field">
                 <label class="label">Labor Capacity</label>
                 <div class="control">
-                    <input class="input" type="number" value="{{ .Emp.LaborCapacity }}" />
+                    <input name="labor_cap" class="input" type="number" min="0.0" max="1.0" step="0.01" value="{{ .Emp.LaborCapacity }}" required/>
                 </div>
                 <p class="help">1.0 for full-time workers</p>
             </div>
@@ -77,47 +53,47 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field">
                 <label class="label">Desk</label>
                 <div class="control">
-                    <input class="input" type="text" value="{{ .Emp.Desk }}" />
+                    <input name="desk" class="input" type="text" value="{{ .Emp.Desk }}" />
                 </div>
                 <p class="help">Where they sit on campus (cube, office or lab room number)</p>
             </div>
 
             <div class="field">
                 <div class="control">
-                  <label class="radio">
-                    <input type="radio" name="active" {{ if .Emp.Active }}checked{{ end }}>
+                <label class="radio">
+                    <input type="radio" name="active" value="on" {{ if .Emp.Active }}checked{{ end }}>
                     Active
-                  </label>
-                  <label class="radio">
-                    <input type="radio" name="active"{{ if .Emp.Active }}{{ else }}checked{{ end }}>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="active" value="off" {{ if .Emp.Active }}{{ else }}checked{{ end }}>
                     Inactive
-                  </label>
+                </label>
                 </div>
-              </div>
+            </div>
 
-              <div class="field">
-                  <label class="label">Coverage Start Date</label>
-                  <div class="control">
-                      <input class="input" type="date" value="{{ .Emp.CoverageStart }}" />
-                  </div>
-                  <p class="help"></p>
-              </div>
+            <div class="field">
+                <label class="label">Coverage Start Date</label>
+                <div class="control">
+                    <input name="cov_start" class="input" type="date" value="{{ .Emp.CoverageStart }}" />
+                </div>
+                <p class="help"></p>
+            </div>
 
-              <div class="field">
-                  <label class="label">Coverage End Date</label>
-                  <div class="control">
-                      <input class="input" type="date" value="{{ .Emp.CoverageEnd }}" />
-                  </div>
-                  <p class="help"></p>
-              </div>
+            <div class="field">
+                <label class="label">Coverage End Date</label>
+                <div class="control">
+                    <input name="cov_end" class="input" type="date" value="{{ .Emp.CoverageEnd }}" />
+                </div>
+                <p class="help"></p>
+            </div>
 
             <div class="field has-addons">
                 <div class="control is-expanded">
                     <div class="select is-fullwidth">
-                        <select id="select-grade">
-                            <option value="0" disabled selected>Select Grade...</option>
+                        <select name="comp" id="select-grade">
+                            <option value="0" disabled {{ if not .Emp.Comp.Valid }}selected{{ end }}>Select Grade...</option>
                             {{ range .CompDropdown }}
-                            <option value="{{.Id}}">{{ .Name }}</option>
+                            <option value="{{.Id}}" {{ if eq .Id $.Emp.Comp.Int64 }}selected{{ end }}>{{ .Name }}</option>
                             {{ end }}
                         </select>
                     </div>
@@ -130,10 +106,10 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field has-addons">
                 <div class="control is-expanded">
                     <div class="select is-fullwidth">
-                        <select id="select-manager">
-                            <option value="0" disabled selected>Select Manager...</option>
+                        <select name="manager" id="select-manager">
+                            <option value="0" disabled {{ if not .Emp.Manager.Valid }}selected{{ end }}>Select Manager...</option>
                             {{ range .EmpDropdown }}
-                            <option value="{{.Id}}">{{ .Name }}</option>
+                            <option value="{{.Id}}" {{ if eq .Id $.Emp.Manager.Int64 }}selected{{ end }}>{{ .Name }}</option>
                             {{ end }}
                         </select>
                     </div>
@@ -146,10 +122,10 @@ func (f *EmployeeForm) InitTemplate() error {
             <div class="field has-addons">
                 <div class="control is-expanded">
                     <div class="select is-fullwidth">
-                        <select id="select-ipt">
-                            <option value="0" disabled selected>Select IPT...</option>
+                        <select name="ipt" id="select-ipt">
+                            <option value="0" disabled {{ if not .Emp.Ipt.Valid }}selected{{ end }}>Select IPT...</option>
                             {{ range .IptDropdown }}
-                            <option value="{{.Id}}">{{ .Name }}</option>
+                            <option value="{{.Id}}" {{ if eq .Id $.Emp.Ipt.Int64 }}selected{{ end }}>{{ .Name }}</option>
                             {{ end }}
                         </select>
                     </div>
@@ -161,25 +137,15 @@ func (f *EmployeeForm) InitTemplate() error {
 
             <div class="field is-grouped">
                 <div class="control">
-                    <button class="button is-link">Submit</button>
+                    <a id="btn-submit" href="employees" class="button is-link">Submit</a>
                 </div>
                 <div class="control">
-                    <button class="button is-danger">Delete</button>
+                    <a id="btn-delete" href="employees" class="button is-danger">Delete</a>
                 </div>
                 <div class="control">
-                    <button class="button is-link is-light">Cancel</button>
+                    <a id="btn-cancel" href="home" class="button is-link is-light">Cancel</a>
                 </div>
             </div>
         </fieldset>
     </form>
 </div>
-	`
-	var err error
-	f.template, err = template.New("employee-form").Parse(markup)
-	if err != nil {
-		return fmt.Errorf("error parsing template: %v", err)
-	}
-	return nil
-}
-
-// handler functions here for the 5 requests against the form
