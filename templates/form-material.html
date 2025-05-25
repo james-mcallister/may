@@ -1,0 +1,166 @@
+<div class="block mt-1">
+    <form>
+        <fieldset>
+
+            <div class="field">
+                <label class="label">ID</label>
+                <div class="control">
+                    <input id="entity-id" name="id" class="input" type="text" value="{{ .Mat.Id }}" disabled />
+                </div>
+                <p class="help">ID is managed by the database</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Name</label>
+                <div class="control">
+                    <input name="name" class="input" type="text" value="{{ .Mat.Name }}" required/>
+                </div>
+                <p class="help">Required Field</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Estimated Cost</label>
+                <div class="control">
+                    <input name="estimated_cost" class="input" type="number" min="0.0" step="0.01" value="{{ .Mat.EstimatedCost }}" />
+                </div>
+                <p class="help">Used as IWM step in discrete file</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Actual Cost</label>
+                <div class="control">
+                    <input name="actual_cost" class="input" type="number" min="0.0" step="0.01" value="{{ .Mat.ActualCost }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Purchase Request (PR) Date</label>
+                <div class="control">
+                    <input name="pr_date" class="input" type="date" value="{{ .Mat.PRDate }}" />
+                </div>
+                <p class="help">Date the PR was created</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Purchase Request (PR) Number</label>
+                <div class="control">
+                    <input name="pr" class="input" type="text" value="{{ .Mat.PRNumber }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Purchase Order (PO) Date</label>
+                <div class="control">
+                    <input name="po_date" class="input" type="date" value="{{ .Mat.PODate }}" />
+                </div>
+                <p class="help">Date the PO was created</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Purchase Order (PO) Number</label>
+                <div class="control">
+                    <input name="po" class="input" type="text" value="{{ .Mat.PONumber }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Status</label>
+                <div class="control">
+                    <div class="select">
+                        <select name="status" id="select-status">
+                            <option value="incomplete" {{ if not .Mat.Complete }}selected{{ end }}></option>
+                            <option value="complete" {{ if .Mat.Complete }}selected{{ end }}>Complete</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Baseline Start Date</label>
+                <div class="control">
+                    <input name="baseline_start_date" class="input" type="date" value="{{ .Mat.BaselineStartDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Baseline Finish Date</label>
+                <div class="control">
+                    <input name="baseline_finish_date" class="input" type="date" value="{{ .Mat.BaselineFinishDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Tentative Start Date</label>
+                <div class="control">
+                    <input name="tentative_start_date" class="input" type="date" value="{{ .Mat.TentativeStartDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Tentative Finish Date</label>
+                <div class="control">
+                    <input name="tentative_finish_date" class="input" type="date" value="{{ .Mat.TentativeFinishDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Actual Start Date</label>
+                <div class="control">
+                    <input name="actual_start_date" class="input" type="date" value="{{ .Mat.ActualStartDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">Actual Finish Date</label>
+                <div class="control">
+                    <input name="actual_finish_date" class="input" type="date" value="{{ .Mat.ActualFinishDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <div class="select is-fullwidth">
+                        <select name="wp" id="select-proj">
+                            <option value="0" disabled {{ if not .Mat.WorkPackage.Valid }}selected{{ end }}>Select Project...</option>
+                            {{ range .ProjDropdown }}
+                            <option value="{{.Id}}" {{ if eq .Id $.Mat.WorkPackage.Int64 }}selected{{ end }}>{{ .Name }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+                <div class="control">
+                    <button class="button clear" data-select-id="select-proj">Clear</button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Notes</label>
+                <div class="control">
+                    <textarea name="notes" class="input" rows="3" type="text">{{ .Mat.Notes }}</textarea>
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field is-grouped">
+                <div class="control">
+                    <a id="btn-submit" href="material" class="button is-link">Submit</a>
+                </div>
+                <div class="control">
+                    <a id="btn-delete" href="material" class="button is-danger">Delete</a>
+                </div>
+                <div class="control">
+                    <a id="btn-cancel" href="home" class="button is-link is-light">Cancel</a>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

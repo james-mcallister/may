@@ -23,6 +23,7 @@ type Material struct {
 	ActualFinishDate    string        `json:"actual_finish_date"`
 	Notes               string        `json:"notes"`
 	WorkPackage         sql.NullInt64 `json:"wp"`
+	WorkPackageName     string        `json:"wp_name"`
 }
 
 func NewMaterial() Material {
@@ -36,17 +37,17 @@ func (e Material) Init(db *sql.DB) error {
 		name TEXT NOT NULL,
 		estimated_cost NUMERIC DEFAULT 0.0,
 		actual_cost NUMERIC DEFAULT 0.0,
-		pr_date TEXT UNIQUE NOT NULL,
-		po_date TEXT DEFAULT '00000',
+		pr_date TEXT DEFAULT '',
+		po_date TEXT DEFAULT '',
 		pr_number TEXT DEFAULT '',
 		po_number TEXT DEFAULT '',
 		complete BOOLEAN DEFAULT FALSE,
-		baseline_start_date TEXT DEFAULT CURRENT_DATE,
-		baseline_finish_date TEXT DEFAULT CURRENT_DATE,
-		tentative_start_date TEXT DEFAULT CURRENT_DATE,
-		tentative_finish_date TEXT DEFAULT CURRENT_DATE,
-		actual_start_date TEXT DEFAULT CURRENT_DATE,
-		actual_finish_date TEXT DEFAULT CURRENT_DATE,
+		baseline_start_date TEXT DEFAULT '',
+		baseline_finish_date TEXT DEFAULT '',
+		tentative_start_date TEXT DEFAULT '',
+		tentative_finish_date TEXT DEFAULT '',
+		actual_start_date TEXT DEFAULT '',
+		actual_finish_date TEXT DEFAULT '',
 		notes TEXT DEFAULT '',
 		proj INTEGER,
 		FOREIGN KEY (proj) REFERENCES Project(id)

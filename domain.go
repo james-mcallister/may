@@ -62,11 +62,40 @@ func initRoutes(mux *http.ServeMux, logger *log.Logger, d Domain) error {
 
 	mux.Handle("GET /home/", middlewareLog(home("Test")))
 
-	// need to map the template to the route somehow
 	mux.Handle("GET /employees/", middlewareLog(entity.Employees(d.Templates, d.db)))
 	mux.Handle("POST /employees/", middlewareLog(form.NewEmployee(d.db)))
 	mux.Handle("GET /employees/{id}/", middlewareLog(form.Employee(d.Templates, d.db)))
 	mux.Handle("PUT /employees/{id}/", middlewareLog(form.UpdateEmployee(d.db)))
 	mux.Handle("DELETE /employees/{id}/", middlewareLog(form.DeleteEmployee(d.db)))
+
+	mux.Handle("GET /compensation/", middlewareLog(entity.Compensation(d.Templates, d.db)))
+	mux.Handle("POST /compensation/", middlewareLog(form.NewCompensation(d.db)))
+	mux.Handle("GET /compensation/{id}/", middlewareLog(form.Compensation(d.Templates, d.db)))
+	mux.Handle("PUT /compensation/{id}/", middlewareLog(form.UpdateCompensation(d.db)))
+	mux.Handle("DELETE /compensation/{id}/", middlewareLog(form.DeleteCompensation(d.db)))
+
+	mux.Handle("GET /ipts/", middlewareLog(entity.Ipts(d.Templates, d.db)))
+	mux.Handle("POST /ipts/", middlewareLog(form.NewIpt(d.db)))
+	mux.Handle("GET /ipts/{id}/", middlewareLog(form.Ipt(d.Templates, d.db)))
+	mux.Handle("PUT /ipts/{id}/", middlewareLog(form.UpdateIpt(d.db)))
+	mux.Handle("DELETE /ipts/{id}/", middlewareLog(form.DeleteIpt(d.db)))
+
+	mux.Handle("GET /material/", middlewareLog(entity.Material(d.Templates, d.db)))
+	mux.Handle("POST /material/", middlewareLog(form.NewMaterial(d.db)))
+	mux.Handle("GET /material/{id}/", middlewareLog(form.Material(d.Templates, d.db)))
+	mux.Handle("PUT /material/{id}/", middlewareLog(form.UpdateMaterial(d.db)))
+	mux.Handle("DELETE /material/{id}/", middlewareLog(form.DeleteMaterial(d.db)))
+
+	mux.Handle("GET /networks/", middlewareLog(entity.Networks(d.Templates, d.db)))
+	mux.Handle("POST /networks/", middlewareLog(form.NewNetwork(d.db)))
+	mux.Handle("GET /networks/{id}/", middlewareLog(form.Network(d.Templates, d.db)))
+	mux.Handle("PUT /networks/{id}/", middlewareLog(form.UpdateNetwork(d.db)))
+	mux.Handle("DELETE /networks/{id}/", middlewareLog(form.DeleteNetwork(d.db)))
+
+	mux.Handle("GET /projects/", middlewareLog(entity.Projects(d.Templates, d.db)))
+	mux.Handle("POST /projects/", middlewareLog(form.NewProject(d.db)))
+	mux.Handle("GET /projects/{id}/", middlewareLog(form.Project(d.Templates, d.db)))
+	mux.Handle("PUT /projects/{id}/", middlewareLog(form.UpdateProject(d.db)))
+	mux.Handle("DELETE /projects/{id}/", middlewareLog(form.DeleteProject(d.db)))
 	return nil
 }

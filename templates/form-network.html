@@ -1,0 +1,90 @@
+<div class="block mt-1">
+    <form>
+        <fieldset>
+
+            <div class="field">
+                <label class="label">ID</label>
+                <div class="control">
+                    <input id="entity-id" name="id" class="input" type="text" value="{{ .Net.Id }}" disabled />
+                </div>
+                <p class="help">ID is managed by the database</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Charge Number</label>
+                <div class="control">
+                    <input name="charge_num" class="input" type="text" value="{{ .Net.ChargeNumber }}" required/>
+                </div>
+                <p class="help">Network Number (required)</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Title</label>
+                <div class="control">
+                    <input name="title" class="input" type="text" value="{{ .Net.Title }}" />
+                </div>
+                <p class="help">Short name for this network</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Description</label>
+                <div class="control">
+                    <input name="description" class="input" type="text" value="{{ .Net.Description }}" />
+                </div>
+                <p class="help">Network description from COBRA</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Status</label>
+                <div class="control">
+                    <input name="status" class="input" type="text" value="{{ .Net.Status }}" />
+                </div>
+                <p class="help">ex: 20 - Labor Only</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Start Date</label>
+                <div class="control">
+                    <input name="start_date" class="input" type="date" value="{{ .Net.StartDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field">
+                <label class="label">End Date</label>
+                <div class="control">
+                    <input name="end_date" class="input" type="date" value="{{ .Net.EndDate }}" />
+                </div>
+                <p class="help"></p>
+            </div>
+
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <div class="select is-fullwidth">
+                        <select name="proj" id="select-proj">
+                            <option value="0" disabled {{ if not .Net.Proj.Valid }}selected{{ end }}>Select Project...</option>
+                            {{ range .ProjDropdown }}
+                            <option value="{{.Id}}" {{ if eq .Id $.Net.Proj.Int64 }}selected{{ end }}>{{ .Name }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+                <div class="control">
+                    <button class="button clear" data-select-id="select-proj">Clear</button>
+                </div>
+            </div>
+
+            <div class="field is-grouped">
+                <div class="control">
+                    <a id="btn-submit" href="networks" class="button is-link">Submit</a>
+                </div>
+                <div class="control">
+                    <a id="btn-delete" href="networks" class="button is-danger">Delete</a>
+                </div>
+                <div class="control">
+                    <a id="btn-cancel" href="home" class="button is-link is-light">Cancel</a>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

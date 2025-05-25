@@ -1,0 +1,51 @@
+<div class="block">
+    <p class="title is-3">Update Network</p>
+    <p class="subtitle is-5">Add/Update charge numbers</p>
+</div>
+<div class="block">
+    <div class="field">
+    <div class="control">
+        <a id="btn-new" class="button is-link" href="networks">Add New</a>
+    </div>
+    </div>
+    <div class="field">
+        <p class="control has-icons-left">
+            <input id="search-input" class="input" type="text" placeholder="Search" />
+            <span class="icon is-small is-left">
+                <i class="fas fa-search"></i>
+            </span>
+        </p>
+    </div>
+</div>
+<div class="block">
+    <div class="table-container">
+        <table class="table is-bordered is-striped is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Charge Number</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Project</th>
+                </tr>
+            </thead>
+            <tbody data-handler="form">
+                {{ range .Nets }}
+                <tr>
+                    <td>{{ .Id }}</td>
+                    <td>{{ .ChargeNumber }}</td>
+                    <td>{{ .Title }}</td>
+                    <td>{{ .Description }}</td>
+                    <td>{{ .Status }}</td>
+                    <td>{{ .StartDate }}</td>
+                    <td>{{ .EndDate }}</td>
+                    <td>{{ .ProjName }}</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>

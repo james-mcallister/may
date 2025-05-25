@@ -1,0 +1,69 @@
+<div class="block">
+    <p class="title is-3">Update Material</p>
+    <p class="subtitle is-5">Choose Material to Update</p>
+</div>
+<div class="block">
+    <div class="field">
+    <div class="control">
+        <a id="btn-new" class="button is-link" href="material">Add New</a>
+    </div>
+    </div>
+    <div class="field">
+        <p class="control has-icons-left">
+            <input id="search-input" class="input" type="text" placeholder="Search" />
+            <span class="icon is-small is-left">
+                <i class="fas fa-search"></i>
+            </span>
+        </p>
+    </div>
+</div>
+<div class="block">
+    <div class="table-container">
+        <table class="table is-bordered is-striped is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Work Package</th>
+                    <th>Estimated Cost</th>
+                    <th>Actual Cost</th>
+                    <th>PR Date</th>
+                    <th>PR Number</th>
+                    <th>PO Date</th>
+                    <th>PO Number</th>
+                    <th>Complete</th>
+                    <th>Baseline Start</th>
+                    <th>Baseline Finish</th>
+                    <th>Tentative Start</th>
+                    <th>Tentative Finish</th>
+                    <th>Actual Start</th>
+                    <th>Actual Finish</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody data-handler="form">
+                {{ range .Mats }}
+                <tr>
+                    <td>{{ .Id }}</td>
+                    <td>{{ .Name }}</td>
+                    <td>{{ .WorkPackageName }}</td>
+                    <td>{{ .EstimatedCost }}</td>
+                    <td>{{ .ActualCost }}</td>
+                    <td>{{ .PRDate }}</td>
+                    <td>{{ .PRNumber }}</td>
+                    <td>{{ .PODate }}</td>
+                    <td>{{ .PONumber }}</td>
+                    <td>{{ .Complete }}</td>
+                    <td>{{ .BaselineStartDate }}</td>
+                    <td>{{ .BaselineFinishDate }}</td>
+                    <td>{{ .TentativeStartDate }}</td>
+                    <td>{{ .TentativeFinishDate }}</td>
+                    <td>{{ .ActualStartDate }}</td>
+                    <td>{{ .ActualFinishDate }}</td>
+                    <td>{{ .Notes }}</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>

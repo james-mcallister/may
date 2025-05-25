@@ -14,6 +14,7 @@ type Network struct {
 	StartDate    string        `json:"start_date"`
 	EndDate      string        `json:"end_date"`
 	Proj         sql.NullInt64 `json:"proj"`
+	ProjName     string        `json:"proj_name"`
 }
 
 func NewNetwork() Network {

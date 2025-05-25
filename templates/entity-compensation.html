@@ -1,0 +1,45 @@
+<div class="block">
+    <p class="title is-3">Update Compensation</p>
+    <p class="subtitle is-5">Add/Update PLATO Resource Codes and Hourly Rates</p>
+</div>
+<div class="block">
+    <div class="field">
+    <div class="control">
+        <a id="btn-new" class="button is-link" href="compensation">Add New</a>
+    </div>
+    </div>
+    <div class="field">
+        <p class="control has-icons-left">
+            <input id="search-input" class="input" type="text" placeholder="Search" />
+            <span class="icon is-small is-left">
+                <i class="fas fa-search"></i>
+            </span>
+        </p>
+    </div>
+</div>
+<div class="block">
+    <div class="table-container">
+        <table class="table is-bordered is-striped is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Resource Code</th>
+                    <th>Grade</th>
+                    <th>Labor Category</th>
+                    <th>Hourly Rate</th>
+                </tr>
+            </thead>
+            <tbody data-handler="form">
+                {{ range .Comps }}
+                <tr>
+                    <td>{{ .Id }}</td>
+                    <td>{{ .ResourceCode }}</td>
+                    <td>{{ .Grade }}</td>
+                    <td>{{ .LaborCategory }}</td>
+                    <td>{{ .HourlyRate }}</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>

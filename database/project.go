@@ -6,17 +6,18 @@ import (
 )
 
 type Project struct {
-	Id            int64         `json:"id,string"`
-	Title         string        `json:"title"`        // Software Maintenance (SM)
-	Description   string        `json:"description"`  // CLIN, Control Account, Work Package, etc.
-	WbsId         string        `json:"wbsid"`        // 1.1002.5.2
-	StmtOfWork    string        `json:"stmt_of_work"` // statement of work or WP description
-	StartDate     string        `json:"start_date"`
-	EndDate       string        `json:"end_date"`
-	ImsUid        int           `json:"ims_uid,string"`    // Assigned by the scheduler
-	WadLineId     int           `json:"wad_lineid,string"` // Is this for the PLATO tab?
-	Evt           string        `json:"evt"`
-	ParentProject sql.NullInt64 `json:"parent_proj"`
+	Id             int64         `json:"id,string"`
+	Title          string        `json:"title"`        // Software Maintenance (SM)
+	Description    string        `json:"description"`  // CLIN, Control Account, Work Package, etc.
+	WbsId          string        `json:"wbsid"`        // 1.1002.5.2
+	StmtOfWork     string        `json:"stmt_of_work"` // statement of work or WP description
+	StartDate      string        `json:"start_date"`
+	EndDate        string        `json:"end_date"`
+	ImsUid         int           `json:"ims_uid,string"`    // Assigned by the scheduler
+	WadLineId      int           `json:"wad_lineid,string"` // Is this for the PLATO tab?
+	Evt            string        `json:"evt"`
+	ParentProject  sql.NullInt64 `json:"parent_proj"`
+	ParentProjName string        `json:"parent_proj_name"`
 }
 
 func NewProject() Project {
@@ -27,9 +28,9 @@ func (p Project) Init(db *sql.DB) error {
 	tableQuery := `
 	CREATE TABLE IF NOT EXISTS Project (
 		id INTEGER PRIMARY KEY,
-		title TEXT UNIQUE NOT NULL,
+		title TEXT DEFAULT '',
 		description TEXT DEFAULT '',
-		wbs_id TEXT DEFAULT '',
+		wbs_id TEXT UNIQUE NOT NULL,
 		stmt_of_work TEXT DEFAULT '',
 		start_date TEXT DEFAULT '',
 		end_date TEXT DEFAULT '',

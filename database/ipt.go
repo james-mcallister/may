@@ -125,7 +125,6 @@ func InsertIpt(db *sql.DB, ipt Ipt) (int64, error) {
 	INSERT INTO Ipt (name,description) VALUES (?, ?);
 	`
 
-	fmt.Println("Inserting")
 	result, err := db.Exec(insertQuery, ipt.Name, ipt.Description)
 	if err != nil {
 		return 0, fmt.Errorf("insert query error: %v", err)

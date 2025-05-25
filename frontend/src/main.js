@@ -1,6 +1,7 @@
 import Big from 'big.js';
 import 'bulma/css/bulma.css';
-import '@fortawesome/fontawesome-free';
+import '@fortawesome/fontawesome-free/js/solid.js';
+import '@fortawesome/fontawesome-free/js/fontawesome.js';
 import $ from 'jquery';
 
 // make jQuery global (for esbuild)
