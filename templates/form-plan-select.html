@@ -1,0 +1,46 @@
+<div class="container">
+    <div class="block">
+      <p class="title is-3">Project Planner</p>
+      <p class="subtitle is-5">select the type of plan</p>
+    </div>
+    <div class="block mt-1">
+      <form>
+        <fieldset>
+          <div class="field">
+              <label class="label">Load Plan</label>
+              <div class="control">
+                  <div class="select is-fullwidth">
+                      <select name="load_plan" id="select-plan" required>
+                          <option value="">Select a plan...</option>
+                          {{ range .Plans }}
+                          <option value="{{ .Id }}">{{ .Name }}</option>
+                          {{ end }}
+                      </select>
+                  </div>
+              </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <label class="checkbox">
+                <input id="plan-new-check" type="checkbox" name="create_new">
+                Create New
+              </label>
+            </div>
+          </div>
+
+          <div id="form-buttons" class="field is-grouped">
+            <div class="control">
+              <a id="btn-select" href="" class="button is-link">Submit</a>
+            </div>
+            <div class="control">
+              <a id="btn-delete" href="" class="button is-danger">Delete</a>
+            </div>
+            <div class="control">
+              <a id="btn-cancel" href="" class="button is-link is-light">Cancel</a>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </div>

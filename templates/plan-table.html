@@ -1,0 +1,90 @@
+<div class="table-container" data-plan-id="{{ .Plan.Id }}" data-pop-start="{{ .Plan.StartDate }}" data-pop-end="{{ .Plan.EndDate }}">
+    <table class="table is-bordered is-striped is-hoverable">
+        <thead>
+            <tr>
+                <th>
+                    <button class="button is-info is-outlined add-row">
+                        <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                    </button>
+                </th>
+                <th>Name</th>
+                <th>Scope</th>
+                <th>Rate</th>
+                <th>
+                    <div class="select is-info">
+                        <select>
+                            <option>Reset</option>
+                            <option>Adjust</option>
+                        </select>
+                    </div>
+                </th>
+                {{ range .Months }}
+                <th>
+                    <button class="button is-text col" data-start-date="{{ .StartDate }}" data-end-date="{{ .EndDate }}" data-fiscal-period="{{ .FiscalPeriod }}">
+                        {{ .DisplayName }}
+                    </button>
+                </th>
+                {{ end }}
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .EmpRows }}
+            <tr data-emp-id="{{ .EmpId }}" data-scope-id="{{ .ScopeId }}">
+                <td>
+                    <button class="button is-danger is-outlined">
+                        <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
+                    </button>
+                </td>
+                <td>{{ .EmpName }}</td>
+                <td>{{ .ScopeName }}</td>
+                <td>{{ .LaborRate }}</td>
+                <td>
+                    <div class="field has-addons">
+                        <div class="control">
+                            <input class="input is-small" type="number" min="0" max="1" step="0.01" value="1.0" />
+                        </div>
+                        <div class="control">
+                            <button class="button is-success is-small">
+                                <span class="icon is-small"><i class="fas fa-calculator"></i></span>
+                            </button>
+                        </div>
+                    </div>
+                </td>
+                {{ range $.Months }}
+                <td><button class="button is-fullwidth calc-table" data-fiscal-period="{{ .FiscalPeriod }}">0</button></td>
+                {{ end }}
+            </tr>
+            {{ end }}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Cost</td>
+                {{ range .Months }}
+                <td>0</td>
+                {{ end }}
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Hours</td>
+                {{ range .Months }}
+                <td>0</td>
+                {{ end }}
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>FTE</td>
+                {{ range .Months }}
+                <td>0</td>
+                {{ end }}
+            </tr>
+        </tbody>
+    </table>
+</div>

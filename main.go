@@ -18,11 +18,19 @@ var static embed.FS
 //go:embed templates/*
 var templ embed.FS
 
+// addition method for template iteration
+func add(a, b int) int {
+	return a + b
+}
+
 func main() {
 	d := NewDomain()
 	d.Init()
 
-	d.Templates = template.Must(template.ParseFS(templ, "templates/*.html"))
+	funcMap := template.FuncMap{
+		"add": add,
+	}
+	d.templates = template.Must(template.New("may-templates").Funcs(funcMap).ParseFS(templ, "templates/*.html"))
 
 	fsys, err := fs.Sub(static, "frontend/dist")
 	if err != nil {
@@ -34,10 +42,8 @@ func main() {
 	middlewareLog := Logger(logger)
 
 	mux := http.NewServeMux()
-	mux.Handle("GET /", middlewareLog(staticFiles))
-	if err := initRoutes(mux, logger, d); err != nil {
-		panic(err)
-	}
+	mux.Handle("/", middlewareLog(staticFiles))
+	initRoutes(mux, logger, d)
 
 	// TODO: configurable options
 	srv := &http.Server{

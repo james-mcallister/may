@@ -1,0 +1,76 @@
+<div class="container">
+    <form>
+        <fieldset>
+            <div class="field">
+                <label class="label">Plan Type</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select name="selected_plan" id="select-planner">
+                            <option value="project" selected>Project</option>
+                            <option value="person">Person</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="emp-fields" class="is-hidden">
+                <div class="field">
+                    <label class="label">Select Employee</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="selected_emp" id="select-employee" required>
+                                <option value="">Select an Employee...</option>
+                                {{ range .Emps }}
+                                <option value="{{ .Id }}">{{ .Name }}</option>
+                                {{ end }}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Start Date</label>
+                    <div class="control">
+                        <input name="start_date" class="input" type="date" value="" required />
+                    </div>
+                    <p class="help"></p>
+                </div>
+
+                <div class="field">
+                    <label class="label">End Date</label>
+                    <div class="control">
+                        <input name="end_date" class="input" type="date" value="" required />
+                    </div>
+                    <p class="help"></p>
+                </div>
+            </div>
+
+            <div id="plan-fields">
+                <div class="field">
+                    <label class="label">Plan Name</label>
+                    <div class="control">
+                        <input name="name" class="input" type="text" value="" required />
+                    </div>
+                    <p class="help"></p>
+                </div>
+
+                <div class="field">
+                    <label class="label">Description</label>
+                    <div class="control">
+                        <textarea name="description" class="input" rows="5" type="text"></textarea>
+                    </div>
+                    <p class="help"></p>
+                </div>
+            </div>
+
+            <div id="form-buttons" class="field is-grouped">
+                <div class="control">
+                    <a id="btn-submit" href="" class="button is-link">Submit</a>
+                </div>
+                <div class="control">
+                    <a id="btn-cancel" href="" class="button is-link is-light">Cancel</a>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

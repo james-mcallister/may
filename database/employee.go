@@ -55,24 +55,24 @@ func (e Employee) Init(db *sql.DB) error {
 
 	insertQuery := `
 	INSERT OR IGNORE INTO Employee
-	  (id, first_name, last_name, myid, empid, comp)
+	  (id, first_name, last_name, myid, empid, comp, display_name)
 	VALUES
-	  (1, 'M1', 'TBD', 'x00001', '00001', 1),
-	  (2, 'M2', 'TBD', 'x00002', '00002', 2),
-	  (3, 'M3', 'TBD', 'x00003', '00003', 3),
-	  (4, 'T1', 'TBD', 'x00004', '00004', 4),
-	  (5, 'T2', 'TBD', 'x00005', '00005', 5),
-	  (6, 'T3', 'TBD', 'x00006', '00006', 6),
-	  (7, 'T4', 'TBD', 'x00007', '00007', 7),
-	  (8, 'T5', 'TBD', 'x00008', '00008', 8),
-	  (9, 'T6', 'TBD', 'x00009', '00009', 9),
-	  (10, 'T7', 'TBD', 'x00016', '00016', 10),
-	  (11, 'A1', 'TBD', 'x00010', '00010', 11),
-	  (12, 'A2', 'TBD', 'x00011', '00011', 12),
-	  (13, 'A3', 'TBD', 'x00012', '00012', 13),
-	  (14, 'A4', 'TBD', 'x00013', '00013', 14),
-	  (15, 'A5', 'TBD', 'x00014', '00014', 15),
-	  (16, 'Intern', 'TBD', 'x00015', '00015', 16);
+	  (1, 'M1', 'TBD', 'x00001', '00001', 1, 'TBD, M1 (x00001)'),
+	  (2, 'M2', 'TBD', 'x00002', '00002', 2, 'TBD, M2 (x00002)'),
+	  (3, 'M3', 'TBD', 'x00003', '00003', 3, 'TBD, M3 (x00003)'),
+	  (4, 'T1', 'TBD', 'x00004', '00004', 4, 'TBD, T1 (x00004)'),
+	  (5, 'T2', 'TBD', 'x00005', '00005', 5, 'TBD, T2 (x00005)'),
+	  (6, 'T3', 'TBD', 'x00006', '00006', 6, 'TBD, T3 (x00006)'),
+	  (7, 'T4', 'TBD', 'x00007', '00007', 7, 'TBD, T4 (x00007)'),
+	  (8, 'T5', 'TBD', 'x00008', '00008', 8, 'TBD, T5 (x00008)'),
+	  (9, 'T6', 'TBD', 'x00009', '00009', 9, 'TBD, T6 (x00009)'),
+	  (10, 'T7', 'TBD', 'x00016', '00016', 10, 'TBD, T7 (x00010)'),
+	  (11, 'A1', 'TBD', 'x00010', '00010', 11, 'TBD, A1 (x00011)'),
+	  (12, 'A2', 'TBD', 'x00011', '00011', 12, 'TBD, A2 (x00012)'),
+	  (13, 'A3', 'TBD', 'x00012', '00012', 13, 'TBD, A3 (x00013)'),
+	  (14, 'A4', 'TBD', 'x00013', '00013', 14, 'TBD, A4 (x00014)'),
+	  (15, 'A5', 'TBD', 'x00014', '00014', 15, 'TBD, A5 (x00015)'),
+	  (16, 'Intern', 'TBD', 'x00015', '00015', 16, 'TBD, Intern (x00015)');
 	`
 	tx, err := db.Begin()
 	if err != nil {
@@ -97,7 +97,7 @@ func (e Employee) Init(db *sql.DB) error {
 }
 
 func EmployeeDropdownQuery() string {
-	return "SELECT last_name || ', ' || first_name || ' (' || myid || ')' AS name,id FROM Employee;"
+	return "SELECT display_name AS name,id FROM Employee;"
 }
 
 func EmployeeImportColumns() []string {

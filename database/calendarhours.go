@@ -17,6 +17,7 @@ func (ch CalendarHours) Init(db *sql.DB) error {
 		id INTEGER PRIMARY KEY,
 		cal_date TEXT UNIQUE NOT NULL,
 		description TEXT DEFAULT '',
+		fiscal_period TEXT DEFAULT '000000',
 		fiscal_year INTEGER,
 		fiscal_month INTEGER,
 		week_num INTEGER, -- what week of the year (0-52)
@@ -7707,6 +7708,10 @@ func (ch CalendarHours) Init(db *sql.DB) error {
 	  ('2040-12-27', 2040, 12, 52, 6, 0, 1),
 	  ('2040-12-28', 2040, 12, 52, 7, 0, 1);
 	`
+
+	fiscalPeriodQuery := `
+	UPDATE CalendarHours SET fiscal_period=fiscal_year || printf('%02d', fiscal_month);
+	`
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("error beginning transaction: %v", err)
@@ -7726,6 +7731,11 @@ func (ch CalendarHours) Init(db *sql.DB) error {
 	_, err = tx.Exec(indexQuery)
 	if err != nil {
 		return fmt.Errorf("error executing CREATE INDEX transaction: %v", err)
+	}
+
+	_, err = tx.Exec(fiscalPeriodQuery)
+	if err != nil {
+		return fmt.Errorf("error executing UPDATE in transaction: %v", err)
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -7752,4 +7762,67 @@ func UpdateCalendarHours(db *sql.DB, cal CalendarHours) (int64, error) {
 		return 0, fmt.Errorf("update result error: %v", err)
 	}
 	return rows, nil
+}
+
+func GetProdHours(db *sql.DB, startDate, endDate string) ([]float64, error) {
+	var h []float64
+
+	getQuery := `
+	SELECT productive_hours
+	FROM CalendarHours
+	WHERE cal_date BETWEEN ? AND ?;
+	`
+
+	rows, err := db.Query(getQuery, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("query error: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p float64
+		if err := rows.Scan(&p); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, fmt.Errorf("error: no rows")
+			}
+			return nil, fmt.Errorf("row scan error: %v", err)
+		}
+		h = append(h, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %v", err)
+	}
+	return h, nil
+}
+
+func GetProdHoursIndex(db *sql.DB, startDate, endDate string) (map[string]int, error) {
+	cals := make(map[string]int)
+
+	getQuery := `
+	SELECT cal_date,ROW_NUMBER() OVER(ORDER BY cal_date) AS idx
+	FROM CalendarHours
+	WHERE cal_date BETWEEN ? AND ?;
+	`
+
+	rows, err := db.Query(getQuery, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("query error: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var d string
+		var p int
+		if err := rows.Scan(&d, &p); err != nil {
+			if err == sql.ErrNoRows {
+				return nil, fmt.Errorf("error: no rows")
+			}
+			return nil, fmt.Errorf("row scan error: %v", err)
+		}
+		cals[d] = p - 1 // 0 based index for client array
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %v", err)
+	}
+	return cals, nil
 }

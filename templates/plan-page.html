@@ -1,0 +1,69 @@
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <p class="subtitle is-3">{{ .Title }}</p>
+            </div>
+        </div>
+
+        <div class="level-right">
+            <div class="level-item">
+                <button id="btn-add-plan" class="button is-small">Add</button>
+            </div>
+            <div class="level-item">
+              <button id="btn-load-plan" class="button is-small">Load</button>
+            </div>
+            <div class="level-item">
+                <button id="btn-delete-plan" class="button is-small">Delete</button>
+            </div>
+            <div class="level-item">
+                <div class="control">
+                    <label class="radio"><input type="radio" name="plan-values" checked />Hours</label>
+                    <label class="radio"><input type="radio" name="plan-values" />FTE</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- this should be the total boxes for hours/cost (target, total, delta) -->
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <div class="field has-addons">
+                    <p class="control">
+                        <button id="target-cost" class="button is-static">0</button>
+                    </p>
+                    <p class="control">
+                        <input id="target-cost-input" class="input" type="text" placeholder="Enter Target Cost" value="{{ .TargetCost }}" />
+                    </p>
+                    <p class="control">
+                        <button id="target-cost-delta" class="button is-static">0</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <div class="field has-addons">
+                    <p class="control">
+                        <button id="target-hours" class="button is-static">0</button>
+                    </p>
+                    <p class="control">
+                        <input id="target-hours-input" class="input" type="text" placeholder="Enter Target Hours" value="{{ .TargetHours }}" />
+                    </p>
+                    <p class="control">
+                        <button id="target-hours-delta" class="button is-static">0</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tabs is-small is-boxed">
+        <!-- add a li element for each tab and attach the div to it -->
+        <!-- as data in jquery -->
+        <!-- bind the click event handler for the li elements to the ul -->
+        <!-- children of the ul should be <li><a>A and LI tags</a></li> -->
+        <ul id="planner-tabs"></ul>
+    </div>
+    <!-- content divs go here -->
+</div>
