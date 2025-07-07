@@ -97,7 +97,7 @@ func (e Employee) Init(db *sql.DB) error {
 }
 
 func EmployeeDropdownQuery() string {
-	return "SELECT display_name AS name,id FROM Employee;"
+	return "SELECT display_name AS name,id FROM Employee ORDER BY display_name;"
 }
 
 func EmployeeImportColumns() []string {

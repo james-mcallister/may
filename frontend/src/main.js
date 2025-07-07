@@ -477,7 +477,6 @@ const PlanFormModule = (function($) {
     function reqPlanPage() {
         let formData = ele.form.serialize();
         let url = "/plan/";
-        console.log(formData);
         $.ajax({
             url: url,
             method: "POST",
@@ -660,18 +659,207 @@ const PlanPage = (function($) {
     function handleAddTab(tabname, content) {
         let newTab = `<li><a>${tabname}</a></li>`;
         ele.plannerTabs.append(newTab);
+        // TODO: maybe add is-active class or similar for easier selection later
+        // this would remove the need for a global variable
         ele.tabs.after(content);
 
         // might need to await these two methods calls
         let c = ele.tabs.next();
-        // attach array of prodHours
+        // attach array of prodHours to table ele
         getProdHours(c);
-        // attach lookup of cal_date: index to prod/plan hours array
+        // attach lookup of cal_date: index to table ele
         getProdHoursLookup(c);
+        // setup event listeners on the table element
+        setupTableEvents(c);
 
         let li = $("ul li").last();
         li.data("content", c);
         li.trigger('click');
+    }
+
+    function setupTableEvents(tableEle) {
+        let planId = tableEle.data("plan-id");
+        let startDate = tableEle.data("pop-start");
+        let endDate = tableEle.data("pop-end");
+
+        tableEle.on("click", "button", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let selectedEle = $(this);
+            let evt = selectedEle.data("evt");
+
+            if (!evt) {
+                MainModule.notify("danger", `internal server error: invalid event`);
+                return
+            }
+
+            const evts = {
+                "add-row": handleAddRow,
+                "adjust-col": handleAdjustCol,
+                "delete-row": handleDelRow,
+                "adjust-row": handleAdjustRow,
+                "show-cal": handleShowCal
+            };
+
+            evts[evt](selectedEle, planId, startDate, endDate);
+        });
+    }
+
+    function handleAddRow(selectedEle, planId, startDate, endDate) {
+        let url = "/api/newrow";
+        $.ajax({
+            url: url,
+            method: "GET",
+            dataType: "html",
+            beforeSend: function() {
+                MainModule.showProgress();
+            },
+        }).done(function(res) {
+            MainModule.endProgress();
+            if (currentTab) {
+                currentTab.data("content").addClass("is-hidden");
+            }
+            ele.tabs.addClass("is-hidden");
+            ele.tabs.before(res);
+            setupRowForm(planId, startDate, endDate);
+        }).fail(function(xhr, status, err) {
+            MainModule.endProgress();
+            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+        });
+    }
+
+    function handleDelRow(selectedEle, planId, startDate, endDate) {
+        // TODO: send delete request to the backend
+        selectedEle.closest("tr").remove();
+    }
+
+    function handleAdjustRow(selectedEle, planId, startDate, endDate) {
+        console.log("adjust row event");
+    }
+
+    function handleAdjustCol(selectedEle, planId, startDate, endDate) {
+        console.log("adjust col event");
+    }
+
+    function handleShowCal(selectedEle, planId, startDate, endDate) {
+        console.log("show cal event");
+    }
+
+    function getTableRow(empId, planId, startDate, endDate) {
+        let url = "/api/planrow";
+        $.ajax({
+            url: url,
+            method: "GET",
+            data: {
+                "start_date": startDate,
+                "end_date": endDate,
+                "emp_ids": empId,
+                "plan_ids": planId
+            },
+            dataType: "html",
+            beforeSend: function() {
+                // show loading indication
+                MainModule.showProgress();
+            },
+        }).done(function(res) {
+            MainModule.endProgress();
+            teardownRowForm();
+            $("#emp-multi-select").remove();
+            ele.tabs.removeClass("is-hidden");
+            if (currentTab) {
+                currentTab.data("content").removeClass("is-hidden");
+                currentTab.data("content").find("tbody").prepend(res);
+                let newRow = $(`tr[data-emp-id='${empId}'][data-scope-id='${planId}']`)
+                getPlanHours(newRow, startDate, endDate);
+            }
+        }).fail(function(xhr, status, err) {
+            MainModule.endProgress();
+            teardownRowForm();
+            $("#emp-multi-select").remove();
+            ele.tabs.removeClass("is-hidden");
+            if (currentTab) {
+                currentTab.data("content").removeClass("is-hidden");
+                currentTab.data("content").find("tbody").prepend(res);
+            }
+            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+        });
+    }
+
+    function setupRowForm(planId, startDate, endDate) {
+        ele.entityList = $("#entity-list");
+        ele.entityList.data("selected", []);
+        ele.entityList.on("click", "a", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let d = ele.entityList.data("selected");
+            let selectedEle = $(this);
+            let name = selectedEle.data("id");
+            if (selectedEle.hasClass("has-background-primary")) {
+                selectedEle.removeClass("has-background-primary");
+                let i = d.indexOf(name);
+                d.splice(i, 1);
+            } else {
+                selectedEle.addClass("has-background-primary");
+                d.push(name);
+            }
+            ele.entityList.data("selected", d);
+        });
+
+        let s = $("#emp-row-search-input");
+        let eList = $("#entity-list a");
+        s.on("keyup", function() {
+            let val = s.val().toLowerCase();
+            eList.filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(val) > -1);
+            });
+        });
+
+        ele.btnPlanFormSubmit = $("#btn-add-employees");
+        ele.btnPlanFormSubmit.on("click", function(e) {
+            handleRowFormSubmit(e, planId, startDate, endDate);
+        });
+        ele.btnPlanFormCancel = $("#btn-cancel-employees");
+        ele.btnPlanFormCancel.on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            teardownRowForm();
+            $("#emp-multi-select").remove();
+            ele.tabs.removeClass("is-hidden");
+            if (currentTab) {
+                currentTab.data("content").removeClass("is-hidden");
+            }
+        });
+    }
+
+    async function handleRowFormSubmit(e, planId, startDate, endDate) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // d is the list of empIds
+        let d = ele.entityList.data("selected");
+
+        // rows is the list of ajax calls
+        let rows = [];
+        for (const eId of d) {
+            let call = initRow(eId, planId, startDate, endDate);
+            rows.push(call);
+        }
+        const res = await Promise.allSettled(rows);
+        for (const r of res) {
+            if (r.status === "rejected") {
+                MainModule.notify("danger", `error: ${r.reason.responseText}`);
+                return
+            }
+            getTableRow(r.value["emp_id"], r.value["plan_id"], startDate, endDate);
+        }
+    }
+
+    function initRow(empId, planId, startDate, endDate) {
+        return $.ajax({
+            url: `/api/planrow?emp_id=${empId}&plan_id=${planId}&start_date=${startDate}&end_date=${endDate}`,
+            method: "POST",
+            dataType: "json"
+        });
     }
 
     function setupForm() {
@@ -683,9 +871,42 @@ const PlanPage = (function($) {
         ele.btnPlanFormSubmit.on("click", handlePlanFormSubmit);
     }
 
+    function teardownRowForm() {
+        $("#emp-row-search-input").off();
+        ele.entityList.off();
+    }
+
     function teardownForm() {
         ele.btnPlanFormCancel.off("click", handlePlanFormCancel);
         ele.btnPlanFormSubmit.off("click", handlePlanFormSubmit);
+    }
+
+    function getPlanHours(rowEle, startDate, endDate) {
+        let url = "/api/planhours";
+        let empId = rowEle.data("emp-id");
+        let scopeId = rowEle.data("scope-id");
+        $.ajax({
+            url: url,
+            method: "GET",
+            data: {
+                "start_date": startDate,
+                "end_date": endDate,
+                "emp_id": empId,
+                "plan_id": scopeId
+            },
+            dataType: "json",
+            beforeSend: function() {
+                // show loading indication
+                MainModule.showProgress();
+            },
+        }).done(function(res) {
+            MainModule.endProgress();
+            //let planHours = new Map(Object.entries(res));
+            rowEle.data("planHours", res);
+        }).fail(function(xhr, status, err) {
+            MainModule.endProgress();
+            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+        });
     }
 
     function getProdHours(tableEle) {
@@ -706,13 +927,9 @@ const PlanPage = (function($) {
             },
         }).done(function(res) {
             MainModule.endProgress();
-            // need to call JSON.parse() on the response,
-            // then attach the parsed json object to the tableEle
             let numDays = res.length;
             tableEle.data("prodHours", res);
             tableEle.data("numDays", numDays);
-            console.log(res);
-            console.log(numDays);
         }).fail(function(xhr, status, err) {
             //ele.fieldset.prop("disabled", false);
             MainModule.endProgress();
@@ -738,11 +955,7 @@ const PlanPage = (function($) {
             },
         }).done(function(res) {
             MainModule.endProgress();
-            // need to call JSON.parse() on the response,
-            // then attach the parsed json object to the tableEle
-            console.log(res);
             tableEle.data("lookup", res);
-            console.log(Object.keys(res).length);
         }).fail(function(xhr, status, err) {
             //ele.fieldset.prop("disabled", false);
             MainModule.endProgress();
@@ -845,6 +1058,7 @@ const PlanPage = (function($) {
         ele.targetCostInput.on("blur", handleUpdateCost);
         ele.plannerTabs.on("click", "li", handleTabClick);
         ele.btnAdd.on("click", handleGetNewPlanForm);
+        currentTab = null;
     }
 
     function teardown() {

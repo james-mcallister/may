@@ -1,19 +1,20 @@
-<div class="container">
+<div id="emp-multi-select" class="container">
     <div class="panel">
-      <p class="panel-heading">Select Employees</p>
-      <div class="panel-block">
-        <p class="control has-icons-left">
-          <input id="emp-row-search-input" class="input" type="text" placeholder="Search">
-          <span class="icon is-left"><i class="fas fa-search"></i></span>
-        </p>
-      </div>
-      <div id="entity-list">
-        {{ range .Emps }}
-        <a class="panel-block" data-id="{{ .Id }}">{{ .DisplayName }}</a>
-        {{ end }}
-      </div>
-      <div class="panel-block">
-        <button id="btn-add-employees" class="button is-fullwidth">Add</button>
-      </div>
+        <p class="panel-heading">Select Employees</p>
+        <div class="panel-block">
+            <p class="control has-icons-left">
+                <input id="emp-row-search-input" class="input" type="text" placeholder="Search" />
+                <span class="icon is-left"><i class="fas fa-search"></i></span>
+            </p>
+        </div>
+        <div id="entity-list">
+            {{ range . }}
+            <a class="panel-block" data-id="{{ .Id }}">{{ .Name }}</a>
+            {{ end }}
+        </div>
+        <div class="panel-block">
+            <button id="btn-add-employees" class="button is-fullwidth">Add</button>
+            <button id="btn-cancel-employees" class="button is-fullwidth">Cancel</button>
+        </div>
     </div>
 </div>

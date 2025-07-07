@@ -71,7 +71,7 @@ func (c Compensation) Init(db *sql.DB) error {
 }
 
 func CompensationDropdownQuery() string {
-	return "SELECT grade || ' - ' || labor_category AS name,id FROM Compensation;"
+	return "SELECT grade || ' - ' || labor_category AS name,id FROM Compensation ORDER BY name;"
 }
 
 func GetCompensation(db *sql.DB, id int64) (Compensation, error) {

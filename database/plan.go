@@ -48,7 +48,7 @@ func (p Plan) Init(db *sql.DB) error {
 }
 
 func PlanDropdownQuery() string {
-	return "SELECT name,id FROM Plan;"
+	return "SELECT name,id FROM Plan ORDER BY name;"
 }
 
 func GetPlan(db *sql.DB, planId int64) (Plan, error) {

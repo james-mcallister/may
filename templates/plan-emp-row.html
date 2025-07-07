@@ -1,0 +1,27 @@
+{{ range . }}
+<tr data-emp-id="{{ .EmpId }}" data-scope-id="{{ .ScopeId }}">
+    <td>
+        <button class="button is-danger is-outlined" data-evt="delete-row">
+            <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
+        </button>
+    </td>
+    <td>{{ .EmpName }}</td>
+    <td>{{ .ScopeName }}</td>
+    <td>{{ .LaborRate }}</td>
+    <td>
+        <div class="field has-addons">
+            <div class="control">
+                <input class="input is-small" type="number" min="0" max="1" step="0.01" value="1.0" />
+            </div>
+            <div class="control">
+                <button class="button is-success is-small" data-evt="adjust-row">
+                    <span class="icon is-small"><i class="fas fa-calculator"></i></span>
+                </button>
+            </div>
+        </div>
+    </td>
+    {{ range .Months }}
+    <td><button class="button is-fullwidth" data-evt="show-cal" data-fiscal-period="{{ .FiscalPeriod }}">0</button></td>
+    {{ end }}
+</tr>
+{{ end }}

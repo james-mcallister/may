@@ -60,7 +60,7 @@ func (p Project) Init(db *sql.DB) error {
 }
 
 func ProjectDropdownQuery() string {
-	return "SELECT wbs_id || ' - ' || title AS name,id FROM Project;"
+	return "SELECT wbs_id || ' - ' || title AS name,id FROM Project ORDER BY name;"
 }
 
 func ProjectImportColumns() []string {

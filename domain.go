@@ -118,7 +118,8 @@ func initRoutes(mux *http.ServeMux, logger *log.Logger, d Domain) {
 	apiMux := http.NewServeMux()
 	apiMux.Handle("GET /prodhours", middlewareLog(plan.ProdHours(d.db)))
 	apiMux.Handle("GET /prodhoursidx", middlewareLog(plan.ProdHoursIdx(d.db)))
-	apiMux.Handle("GET /planrow", middlewareLog(plan.PlanRow(d.db)))
+	apiMux.Handle("GET /planrow", middlewareLog(plan.PlanRow(d.templates, d.db)))
+	apiMux.Handle("GET /newrow", middlewareLog(plan.NewPlanRowForm(d.templates, d.db)))
 	apiMux.Handle("POST /planrow", middlewareLog(plan.NewPlanRow(d.db)))
 	apiMux.Handle("GET /planhours", middlewareLog(plan.PlanHours(d.db)))
 

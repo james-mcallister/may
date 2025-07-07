@@ -46,7 +46,7 @@ func (p PlanPage) Init(db *sql.DB) error {
 }
 
 func PlanPageDropdownQuery() string {
-	return "SELECT title AS name,id FROM PlanPage;"
+	return "SELECT title AS name,id FROM PlanPage ORDER BY name;"
 }
 
 func GetPlanPage(db *sql.DB, id int64) (PlanPage, error) {

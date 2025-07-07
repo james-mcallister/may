@@ -74,7 +74,8 @@ func (e Material) Init(db *sql.DB) error {
 }
 
 func MaterialDropdownQuery() string {
-	return "SELECT name,id FROM Material;"
+	// TODO: might have to ORDER BY date
+	return "SELECT name,id FROM Material ORDER BY id;"
 }
 
 func GetMaterial(db *sql.DB, id int64) (Material, error) {

@@ -58,7 +58,7 @@ func (i Ipt) Init(db *sql.DB) error {
 }
 
 func IptDropdownQuery() string {
-	return "SELECT name,id FROM Ipt;"
+	return "SELECT name,id FROM Ipt ORDER BY name;"
 }
 
 func GetIpt(db *sql.DB, id int64) (Ipt, error) {

@@ -58,31 +58,37 @@ func InitPlanRow(db *sql.DB, empId, planId int64, startDate, endDate string) (in
 		return 0, fmt.Errorf("date list error: %v", err)
 	}
 
+	insertStmt := "INSERT INTO PlanDay (planned_hours,cal_date,emp,plan) VALUES "
+
 	var sb strings.Builder
 	e := strconv.FormatInt(empId, 10)
 	p := strconv.FormatInt(planId, 10)
 	l := len(dates) - 1
 
-	sb.WriteString("INSERT INTO PlanDay (planned_hours,cal_date,emp,plan) VALUES ")
+	// number of bytes of hardcoded values in the loop (date is standard length)
+	// not including the emp/plan ids
+	// (0.0,'2025-01-01',,),
+	lenRow := 21
+	numRows := len(dates)
+	stringBytes := ((len(e) + len(p) + lenRow) * numRows) + len(insertStmt)
+
+	sb.Grow(stringBytes)
+	sb.WriteString(insertStmt)
 	for i := 0; i < l; i++ {
-		sb.WriteString("(0.0,")
-		sb.WriteString("'")
+		sb.WriteString("(0.0,'")
 		sb.WriteString(dates[i])
-		sb.WriteString("'")
-		sb.WriteString(",")
+		sb.WriteString("',")
 		sb.WriteString(e)
-		sb.WriteString(",")
+		sb.WriteByte(',')
 		sb.WriteString(p)
 		sb.WriteString("),")
 	}
 	// last row is semicolon terminated
-	sb.WriteString("(0.0,")
-	sb.WriteString("'")
+	sb.WriteString("(0.0,'")
 	sb.WriteString(dates[l])
-	sb.WriteString("'")
-	sb.WriteString(",")
+	sb.WriteString("',")
 	sb.WriteString(e)
-	sb.WriteString(",")
+	sb.WriteByte(',')
 	sb.WriteString(p)
 	sb.WriteString(");")
 
@@ -132,63 +138,101 @@ func GetDateList(db *sql.DB, startDate, endDate string) ([]string, error) {
 	return dates, nil
 }
 
-type PlanRow struct {
-	EmpId  int64              `json:"emp_id"`
-	PlanId int64              `json:"plan_id"`
-	Hours  map[string]float64 `json:"hours"`
+type TableRow struct {
+	EmpId     int64
+	ScopeId   int64
+	EmpName   string
+	ScopeName string
+	LaborRate string
+	Months    []PlanMonth
 }
 
-func GetPlanRow(db *sql.DB, empId, planId int64, startDate, endDate string) (PlanRow, error) {
-	hours := make(map[string]float64)
-	row := PlanRow{
-		EmpId:  empId,
-		PlanId: planId,
-	}
+func GetPlanRows(db *sql.DB, empId, planId []int64, startDate, endDate string) ([]TableRow, error) {
+	var data []TableRow
+	var sb strings.Builder
 
-	getQuery := `
-	SELECT cal_date,planned_hours
-	FROM PlanDay
-	WHERE cal_date BETWEEN ? AND ?
-	  AND emp = ?
-	  AND plan = ?;
+	stmt1 := `
+	SELECT e.id,e.display_name,
+		   p.id,p.name,c.hourly_rate
+	FROM PlanDay pd
+	JOIN Employee e ON pd.emp=e.id
+	JOIN Compensation c ON e.comp=c.id
+	JOIN Plan p ON pd.plan=p.id
+	WHERE e.id IN (`
+
+	stmt2 := `)
+	AND p.id IN (`
+
+	stmt3 := `)
+	GROUP BY e.display_name,p.name,c.hourly_rate
+	ORDER BY e.display_name;
 	`
 
-	rows, err := db.Query(getQuery, startDate, endDate, empId, planId)
+	// minimize allocations. 50 is a rough estimate for id string size
+	growSize := len(stmt1) + len(stmt2) + len(stmt3) + 50
+	sb.Grow(growSize)
+
+	sb.WriteString(stmt1)
+	num := len(empId) - 1
+	for i := 0; i < num; i++ {
+		sb.WriteString(strconv.FormatInt(empId[i], 10))
+		sb.WriteByte(',')
+	}
+	sb.WriteString(strconv.FormatInt(empId[num], 10))
+
+	sb.WriteString(stmt2)
+	num = len(planId) - 1
+	for i := 0; i < num; i++ {
+		sb.WriteString(strconv.FormatInt(planId[i], 10))
+		sb.WriteByte(',')
+	}
+	sb.WriteString(strconv.FormatInt(planId[num], 10))
+	sb.WriteString(stmt3)
+
+	getQuery := sb.String()
+
+	rows, err := db.Query(getQuery)
 	if err != nil {
-		return row, fmt.Errorf("query error: %v", err)
+		return data, fmt.Errorf("query error: %v", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var d string
-		var p float64
-		if err := rows.Scan(&d, &p); err != nil {
+		var t TableRow
+		if err := rows.Scan(&t.EmpId, &t.EmpName, &t.ScopeId, &t.ScopeName, &t.LaborRate); err != nil {
 			if err == sql.ErrNoRows {
-				return row, fmt.Errorf("error: no rows")
+				return data, fmt.Errorf("error: no rows")
 			}
-			return row, fmt.Errorf("row scan error: %v", err)
+			return data, fmt.Errorf("row scan error: %v", err)
 		}
-		hours[d] = p
+
+		months, err := GetPlanMonths(db, startDate, endDate)
+		if err != nil {
+			return data, fmt.Errorf("error getting months: %v", err)
+		}
+		t.Months = months
+		data = append(data, t)
 	}
 	if err := rows.Err(); err != nil {
-		return row, fmt.Errorf("rows error: %v", err)
+		return data, fmt.Errorf("rows error: %v", err)
 	}
-	row.Hours = hours
-	return row, nil
+
+	return data, nil
 }
 
 func GetPlanHours(db *sql.DB, empId, planId int64, startDate, endDate string) ([]float64, error) {
 	var h []float64
 
 	getQuery := `
-	SELECT planned_hours
-	FROM PlanDay
-	WHERE cal_date BETWEEN ? AND ?
-	  AND emp = ?
-	  AND plan = ?;
+	SELECT IFNULL(planned_hours,0)
+	FROM CalendarHours c
+	FULL JOIN PlanDay p ON p.cal_date = c.cal_date
+		AND emp = ?
+		AND plan = ?
+	WHERE c.cal_date BETWEEN ? AND ?;
 	`
 
-	rows, err := db.Query(getQuery, startDate, endDate, empId, planId)
+	rows, err := db.Query(getQuery, empId, planId, startDate, endDate)
 	if err != nil {
 		return nil, fmt.Errorf("query error: %v", err)
 	}
@@ -209,52 +253,6 @@ func GetPlanHours(db *sql.DB, empId, planId int64, startDate, endDate string) ([
 	}
 	return h, nil
 }
-
-type TableRow struct {
-	EmpId     int64
-	ScopeId   int64
-	EmpName   string
-	ScopeName string
-	LaborRate string
-}
-
-// func LoadPlanRows(db *sql.DB, empId, planId int64, startDate, endDate string) ([]TableRow, error) {
-// 	var planRows []TableRow
-
-// 	// TODO: plan hours by day is a separate query. load here should be able to use
-// 	// sum of each month with group by for the template
-// 	// try to have zeros for cal_date not in PlanDay table
-// 	getQuery := `
-// 	SELECT c.fiscal_year,c.fiscal_month,sum(p.planned_hours)
-// 	FROM CalendarHours c
-// 	JOIN PlanDay p ON c.cal_date = p.cal_date
-// 	WHERE c.cal_date BETWEEN ? AND ?
-// 	  AND emp = ?
-// 	  AND plan = ?
-// 	GROUP BY c.fiscal_year,c.fiscal_month;
-// 	`
-
-// 	rows, err := db.Query(getQuery, startDate, endDate, empId, planId)
-// 	if err != nil {
-// 		return planRows, fmt.Errorf("query error: %v", err)
-// 	}
-// 	defer rows.Close()
-
-// 	for rows.Next() {
-// 		var r Row
-// 		if err := rows.Scan(); err != nil {
-// 			if err == sql.ErrNoRows {
-// 				return planRows, fmt.Errorf("error: no rows")
-// 			}
-// 			return planRows, fmt.Errorf("row scan error: %v", err)
-// 		}
-// 		hours[d] = p
-// 	}
-// 	if err := rows.Err(); err != nil {
-// 		return planRows, fmt.Errorf("rows error: %v", err)
-// 	}
-// 	return planRows, nil
-// }
 
 func UpdatePlanRow(db *sql.DB, empId, planId int64, rows []PlanDay) error {
 	tx, err := db.Begin()

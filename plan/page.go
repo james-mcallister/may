@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/james-mcallister/may/database"
@@ -94,21 +95,35 @@ func Page(t *template.Template, db *sql.DB) http.Handler {
 	})
 }
 
-func PlanRow(db *sql.DB) http.Handler {
+func PlanRow(t *template.Template, db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
+		// expecting emp_ids and plan_ids to be a comma separated list of int64 nums
 		params := r.URL.Query()
-		empId, err := strconv.ParseInt(params.Get("emp_id"), 10, 64)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+
+		empIdsParam := params.Get("emp_ids")
+		empIdsStr := strings.Split(empIdsParam, ",")
+		empIds := make([]int64, len(empIdsStr))
+		for i, val := range empIdsStr {
+			empIds[i], err = strconv.ParseInt(val, 10, 64)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
 		}
-		planId, err := strconv.ParseInt(params.Get("plan_id"), 10, 64)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+
+		planIdsParam := params.Get("plan_ids")
+		planIdsStr := strings.Split(planIdsParam, ",")
+		planIds := make([]int64, len(planIdsStr))
+		for i, val := range planIdsStr {
+			planIds[i], err = strconv.ParseInt(val, 10, 64)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
 		}
+
 		startDate := params.Get("start_date")
 		endDate := params.Get("end_date")
 
@@ -117,17 +132,16 @@ func PlanRow(db *sql.DB) http.Handler {
 			return
 		}
 
-		planHours, err := database.GetPlanRow(db, empId, planId, startDate, endDate)
+		planRow, err := database.GetPlanRows(db, empIds, planIds, startDate, endDate)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		encoder := json.NewEncoder(w)
-		encoder.Encode(planHours)
+		if err := t.ExecuteTemplate(w, "plan-emp-row.html", planRow); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 }
 
@@ -253,6 +267,10 @@ func NewPlanTable(t *template.Template, db *sql.DB) http.Handler {
 			return
 		}
 
+		// TODO: need to add param for PlanPage id (int64)
+		// this might actually not be needed until save is clicked.
+		// then save will associate all the plans on the page with the page
+		// this gives flexibility for which tables are used on which page
 		tab := database.Plan{
 			Name:      r.FormValue("name"),
 			StartDate: r.FormValue("start_date"),
@@ -293,6 +311,11 @@ func NewPlanForm(t *template.Template, db *sql.DB) http.Handler {
 	})
 }
 
+type RowId struct {
+	EmpId  int64 `json:"emp_id,string"`
+	PlanId int64 `json:"plan_id,string"`
+}
+
 func NewPlanRow(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -322,6 +345,32 @@ func NewPlanRow(db *sql.DB) http.Handler {
 			return
 		}
 
+		rowId := RowId{
+			EmpId:  empId,
+			PlanId: planId,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+
+		encoder := json.NewEncoder(w)
+		encoder.Encode(rowId)
+	})
+}
+
+func NewPlanRowForm(t *template.Template, db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+
+		data, err := database.NewDropdown(db, database.EmployeeDropdownQuery())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err = t.ExecuteTemplate(w, "emp-row-select.html", data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 }

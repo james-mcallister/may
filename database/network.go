@@ -54,7 +54,7 @@ func (n Network) Init(db *sql.DB) error {
 }
 
 func NetworkDropdownQuery() string {
-	return "SELECT charge_number || ' - ' || title AS name,id FROM Network;"
+	return "SELECT charge_number || ' - ' || title AS name,id FROM Network ORDER BY name;"
 }
 
 func NetworkImportColumns() []string {
