@@ -791,9 +791,9 @@ const PlanPage = (function($) {
             e.preventDefault();
             e.stopPropagation();
             let m = $("#hours-input").val();
-            console.log(m);
             teardownHoursModal();
-            ele.planPage.trigger("may:update-hours", [m, fiscalPeriod, monthStart, monthEnd]);
+            let selector = `button[data-fiscal-period='${fiscalPeriod}']`
+            ele.planPage.trigger("may:update-hours", [m, selector, monthStart, monthEnd]);
         });
         $("#close-modal, #btn-cancel-modal, .modal-background").on("click", function(e) {
             e.preventDefault();
@@ -1185,26 +1185,18 @@ const PlanPage = (function($) {
         console.log(data);
     }
 
-    function updateHours(e, multiplier, fiscalPeriod, monthStart, monthEnd) {
+    function updateHours(e, multiplier, selector, monthStart, monthEnd) {
         e.preventDefault();
         e.stopPropagation();
-        console.log("update hours called");
-        console.log(multiplier);
-        console.log(fiscalPeriod);
         if (!currentTab) {
-            console.log("no current tab");
             return
         }
 
         try {
             let m = new Big(multiplier);
-            let selector = `button[data-fiscal-period='${fiscalPeriod}']`
             let tBody = currentTab.data("content").find("tbody");
             let tHead = currentTab.data("content").find("thead");
             let hoursOp = tHead.find("select").val();
-            console.log(hoursOp);
-            console.log(selector);
-            console.log(tBody);
             if (hoursOp === "Adjust") {
                 tBody.find(selector).each(function(i, e) {
                     let mul = m.plus("1.0");
@@ -1227,19 +1219,42 @@ const PlanPage = (function($) {
     function resetMonthHours(multiplier, monthStart, monthEnd) {
         let prodHours = currentTab.data("content").data("prodHours");
         let lookup = currentTab.data("content").data("lookup");
-        let startIdx = lookup[monthStart];
-        let endIdx = lookup[monthEnd];
-        let newHours = new Big("0");
+        let startIdx = getStartIndex(monthStart, lookup);
+        let endIdx = getEndIndex(monthEnd, lookup);
+        let count = endIdx - startIdx;
+        let newHours = new Big("0.0");
 
-        for (let i=0; i <= endIdx; i++) {
+        for (let i=0; i <= count; i++) {
             let idx = startIdx + i;
             let h = new Big(prodHours[idx]);
             let newVal = h.times(multiplier);
             newHours = newHours.plus(newVal);
+            console.log(`Iteration: ${i}, Index: ${idx}, Hours: ${h}, Multiplier: ${multiplier}, New Value: ${newVal}`);
         }
-        // this is coming out wrong
         console.log(newHours.toString());
-        return newHours.toString()
+        return newHours.toString();
+    }
+
+    function getStartIndex(monthStart, lookup) {
+        // edge case where the beginning and end of the PoP might be after
+        // the month start date
+        let c = monthStart in lookup
+        if (!c) {
+            return 0; // first index
+        }
+        return lookup[monthStart];
+    }
+
+    function getEndIndex(monthEnd, lookup) {
+        // edge case where the beginning and end of the PoP might be after
+        // the month end date
+        let c = monthEnd in lookup
+        if (!c) {
+            let lookupLength = Object.keys(lookup).length;
+            console.log(lookupLength - 1);
+            return lookupLength - 1; // last index
+        }
+        return lookup[monthEnd];
     }
 
     function init() {
