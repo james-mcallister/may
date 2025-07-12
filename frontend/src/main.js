@@ -678,7 +678,6 @@ const PlanPage = (function($) {
     }
 
     function setupTableEvents(tableEle) {
-        let planId = tableEle.data("plan-id");
         let startDate = tableEle.data("pop-start");
         let endDate = tableEle.data("pop-end");
 
@@ -701,12 +700,14 @@ const PlanPage = (function($) {
                 "show-cal": handleShowCal
             };
 
-            evts[evt](selectedEle, planId, startDate, endDate);
+            evts[evt](selectedEle, startDate, endDate);
         });
     }
 
-    function handleAddRow(selectedEle, planId, startDate, endDate) {
+    function handleAdjustRow(selectedEle, startDate, endDate) {
         let url = "/api/newrow";
+        let planId = selectedEle.closest("tr").data("scope-id");
+        let empId = selectedEle.closest("tr").data("emp-id");
         $.ajax({
             url: url,
             method: "GET",
@@ -728,21 +729,163 @@ const PlanPage = (function($) {
         });
     }
 
-    function handleDelRow(selectedEle, planId, startDate, endDate) {
-        // TODO: send delete request to the backend
-        selectedEle.closest("tr").remove();
+    // TODO: save logic should save the plan hours for each row, and add the
+    // plan page id for load later. Since the plans and plan pages will be
+    // // many to many, need an association table
+    // function handleAdjustCol(selectedEle, startDate, endDate) {
+    //     let fiscalPeriod = selectedEle.data("fiscal-period");
+    //     if (!fiscalPeriod) {
+    //         MainModule.notify("danger", "invalid element selected");
+    //         return
+    //     }
+    //     let planId = selectedEle.closest("tr").data("scope-id");
+    //     let empId = selectedEle.closest("tr").data("emp-id");
+    //     let url = `/api/planrow?emp_id=${empId}&plan_id=${planId}`;
+    //     let hours = serializePlanHours(selectedEle);
+    //     $.ajax({
+    //         url: url,
+    //         method: "PUT",
+    //         contentType: "application/json",
+    //         data: JSON.stringify(hours),
+    //         beforeSend: function() {
+    //             MainModule.showProgress();
+    //         },
+    //     }).done(function(res) {
+    //         MainModule.endProgress();
+    //         ele.planPage.trigger("may:update-hours", [fiscalPeriod]);
+    //     }).fail(function(xhr, status, err) {
+    //         MainModule.endProgress();
+    //         MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+    //     });
+    // }
+
+    function modalFormMarkup() {
+        let markup = `
+        <div class="modal" id="hours-modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Adjust Hours</p>
+                <button class="delete" aria-label="close" id="close-modal"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">Enter a Value Between -1.0 and 1.0</label>
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Hours" id="hours-input">
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" id="btn-submit-modal">Submit</button>
+                <button class="button" id="btn-cancel-modal">Cancel</button>
+            </footer>
+            </div>
+        </div>
+        `
+        return markup
     }
 
-    function handleAdjustRow(selectedEle, planId, startDate, endDate) {
-        console.log("adjust row event");
+    function setupHoursModal(fiscalPeriod, monthStart, monthEnd) {
+        $("#btn-submit-modal").on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let m = $("#hours-input").val();
+            console.log(m);
+            teardownHoursModal();
+            ele.planPage.trigger("may:update-hours", [m, fiscalPeriod, monthStart, monthEnd]);
+        });
+        $("#close-modal, #btn-cancel-modal, .modal-background").on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $("#hours-modal").removeClass("is-active");
+            teardownHoursModal();
+        });
     }
 
-    function handleAdjustCol(selectedEle, planId, startDate, endDate) {
-        console.log("adjust col event");
+    function teardownHoursModal() {
+        let modal = $("#hours-modal");
+        modal.off();
+        modal.remove();
     }
 
-    function handleShowCal(selectedEle, planId, startDate, endDate) {
-        console.log("show cal event");
+    function handleAdjustCol(selectedEle, startDate, endDate) {
+        let markup = modalFormMarkup();
+        $("#app").before(markup);
+        let fiscalPeriod = selectedEle.data("fiscal-period");
+        let monthStart = selectedEle.data("start-date");
+        let monthEnd = selectedEle.data("end-date");
+        setupHoursModal(fiscalPeriod, monthStart, monthEnd);
+        $("#hours-modal").addClass("is-active");
+    }
+
+    function handleAddRow(selectedEle, startDate, endDate) {
+        let url = "/api/newrow";
+        let planId = selectedEle.closest("div.table-container").data("plan-id");
+        $.ajax({
+            url: url,
+            method: "GET",
+            dataType: "html",
+            beforeSend: function() {
+                MainModule.showProgress();
+            },
+        }).done(function(res) {
+            MainModule.endProgress();
+            if (currentTab) {
+                currentTab.data("content").addClass("is-hidden");
+            }
+            ele.tabs.addClass("is-hidden");
+            ele.tabs.before(res);
+            setupRowForm(planId, startDate, endDate);
+        }).fail(function(xhr, status, err) {
+            MainModule.endProgress();
+            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+        });
+    }
+
+    function handleDelRow(selectedEle, startDate, endDate) {
+        let planId = selectedEle.closest("tr").data("scope-id");
+        let empId = selectedEle.closest("tr").data("emp-id");
+        let url = `/api/planrow?emp_id=${empId}&plan_id=${planId}`;
+        $.ajax({
+            url: url,
+            method: "DELETE",
+            beforeSend: function() {
+                MainModule.showProgress();
+            },
+        }).done(function(res) {
+            MainModule.endProgress();
+            selectedEle.closest("tr").remove();
+        }).fail(function(xhr, status, err) {
+            MainModule.endProgress();
+            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+        });
+    }
+
+    function handleShowCal(selectedEle, startDate, endDate) {
+        let url = "";
+        let planId = selectedEle.closest("tr").data("scope-id");
+        let empId = selectedEle.closest("tr").data("emp-id");
+        $.ajax({
+            url: url,
+            method: "DELETE",
+            data: {
+                "start_date": startDate,
+                "end_date": endDate,
+                "emp_id": empId,
+                "plan_id": planId
+            },
+            dataType: "html",
+            beforeSend: function() {
+                MainModule.showProgress();
+            },
+        }).done(function(res) {
+            MainModule.endProgress();
+            selectedEle.closest("tr").remove();
+        }).fail(function(xhr, status, err) {
+            MainModule.endProgress();
+            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+        });
     }
 
     function getTableRow(empId, planId, startDate, endDate) {
@@ -1030,8 +1173,73 @@ const PlanPage = (function($) {
         });
     }
 
-    function updateTotalHours() {
-        return
+    function serializePlanHours(selectedEle) {
+        let lookup = currentTab.data("lookup");
+        let planHours = selectedEle.data("planHours");
+        let data = {};
+        let idx = 0;
+        for (const k in lookup) {
+            idx = lookup[k];
+            data[k] = planHours[idx];
+        }
+        console.log(data);
+    }
+
+    function updateHours(e, multiplier, fiscalPeriod, monthStart, monthEnd) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("update hours called");
+        console.log(multiplier);
+        console.log(fiscalPeriod);
+        if (!currentTab) {
+            console.log("no current tab");
+            return
+        }
+
+        try {
+            let m = new Big(multiplier);
+            let selector = `button[data-fiscal-period='${fiscalPeriod}']`
+            let tBody = currentTab.data("content").find("tbody");
+            let tHead = currentTab.data("content").find("thead");
+            let hoursOp = tHead.find("select").val();
+            console.log(hoursOp);
+            console.log(selector);
+            console.log(tBody);
+            if (hoursOp === "Adjust") {
+                tBody.find(selector).each(function(i, e) {
+                    let mul = m.plus("1.0");
+                    let val = $(this).text();
+                    let newVal = mul.times(val);
+                    $(this).text(newVal.toString());
+                });
+            } else if (hoursOp === "Reset") {
+                let hours = resetMonthHours(m, monthStart, monthEnd);
+                tBody.find(selector).each(function(i, e) {
+                    $(this).text(hours);
+                });
+            }
+        } catch (e) {
+            console.log(e);
+            return
+        }
+    }
+
+    function resetMonthHours(multiplier, monthStart, monthEnd) {
+        let prodHours = currentTab.data("content").data("prodHours");
+        let lookup = currentTab.data("content").data("lookup");
+        let startIdx = lookup[monthStart];
+        let endIdx = lookup[monthEnd];
+        let newHours = new Big("0");
+
+        for (let i=0; i <= endIdx; i++) {
+            let idx = startIdx + i;
+            let h = new Big(prodHours[idx]);
+            let newVal = h.times(multiplier);
+            newHours = newHours.plus(newVal);
+        }
+        // this is coming out wrong
+        console.log(newHours.toString());
+        return newHours.toString()
     }
 
     function init() {
@@ -1053,11 +1261,13 @@ const PlanPage = (function($) {
         ele.targetCostDelta = $("#target-cost-delta");
         ele.tabs = $("div.tabs");
         ele.plannerTabs = $("#planner-tabs");
+        ele.planPage = $("#plan-page");
 
         ele.targetHoursInput.on("blur", handleUpdateHours);
         ele.targetCostInput.on("blur", handleUpdateCost);
         ele.plannerTabs.on("click", "li", handleTabClick);
         ele.btnAdd.on("click", handleGetNewPlanForm);
+        ele.planPage.on("may:update-hours", updateHours);
         currentTab = null;
     }
 

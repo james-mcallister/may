@@ -110,7 +110,8 @@ func AllMaterials(db *sql.DB) ([]Material, error) {
 		po_number,complete,baseline_start_date,baseline_finish_date,
 		tentative_start_date,tentative_finish_date,actual_start_date,
 		actual_finish_date,notes,proj
-	FROM Material;
+	FROM Material
+	ORDER BY tentative_finish_date,name;
 	`
 
 	rows, err := db.Query(getQuery)

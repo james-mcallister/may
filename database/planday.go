@@ -346,3 +346,22 @@ func FormatDate(fy, fm int) string {
 	}
 	return monthLookup[fm] + "-" + strconv.Itoa(fy)
 }
+
+func DeletePlanRow(db *sql.DB, empId, planId int64) (int64, error) {
+	deleteQuery := `
+	DELETE FROM PlanDay
+	WHERE emp=?
+	  AND plan=?;
+	`
+
+	result, err := db.Exec(deleteQuery, empId, planId)
+	if err != nil {
+		return 0, fmt.Errorf("delete query exec error: %v", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("delete query result error: %v", err)
+	}
+	return rows, nil
+}

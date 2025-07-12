@@ -97,7 +97,11 @@ func GetCompensation(db *sql.DB, id int64) (Compensation, error) {
 func AllCompensation(db *sql.DB) ([]Compensation, error) {
 	var comps []Compensation
 
-	getQuery := `SELECT id,resource_code,grade,labor_category,hourly_rate FROM Compensation;`
+	getQuery := `
+	SELECT id,resource_code,grade,labor_category,hourly_rate
+	FROM Compensation
+	ORDER BY grade;
+	`
 
 	rows, err := db.Query(getQuery)
 	if err != nil {

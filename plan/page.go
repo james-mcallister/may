@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"html/template"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -372,5 +373,80 @@ func NewPlanRowForm(t *template.Template, db *sql.DB) http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	})
+}
+
+func DeleteRow(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+
+		params := r.URL.Query()
+		empId, err := strconv.ParseInt(params.Get("emp_id"), 10, 64)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		planId, err := strconv.ParseInt(params.Get("plan_id"), 10, 64)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		_, err = database.DeletePlanRow(db, empId, planId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+}
+
+func UpdateRow(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+
+		params := r.URL.Query()
+		empId, err := strconv.ParseInt(params.Get("emp_id"), 10, 64)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		planId, err := strconv.ParseInt(params.Get("plan_id"), 10, 64)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		body, err := io.ReadAll(io.LimitReader(r.Body, 10<<20)) // 10MB limit
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		var data map[string]float64
+		if err := json.Unmarshal(body, &data); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		i := 0
+		rows := make([]database.PlanDay, len(data))
+		for k, v := range data {
+			r := database.PlanDay{
+				CalDate:   k,
+				PlanHours: v,
+			}
+			rows[i] = r
+			i++
+		}
+
+		if err = database.UpdatePlanRow(db, empId, planId, rows); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 	})
 }

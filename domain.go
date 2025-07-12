@@ -104,12 +104,6 @@ func initRoutes(mux *http.ServeMux, logger *log.Logger, d Domain) {
 	mux.Handle("POST /plan/", middlewareLog(plan.Page(d.templates, d.db)))
 
 	evmsMux := http.NewServeMux()
-	// should be /evms/plan for tables
-	// GET /evms/plan/{id} is for load table
-	// GET /evms/plan/ for new table form
-	// /evms/cal for calendar
-	// /evms/new for new plan form
-	// /evms/load for load
 	evmsMux.Handle("POST /plan", middlewareLog(plan.NewPlanTable(d.templates, d.db)))
 	evmsMux.Handle("GET /plan", middlewareLog(plan.NewPlanForm(d.templates, d.db)))
 
@@ -118,10 +112,12 @@ func initRoutes(mux *http.ServeMux, logger *log.Logger, d Domain) {
 	apiMux := http.NewServeMux()
 	apiMux.Handle("GET /prodhours", middlewareLog(plan.ProdHours(d.db)))
 	apiMux.Handle("GET /prodhoursidx", middlewareLog(plan.ProdHoursIdx(d.db)))
-	apiMux.Handle("GET /planrow", middlewareLog(plan.PlanRow(d.templates, d.db)))
 	apiMux.Handle("GET /newrow", middlewareLog(plan.NewPlanRowForm(d.templates, d.db)))
-	apiMux.Handle("POST /planrow", middlewareLog(plan.NewPlanRow(d.db)))
 	apiMux.Handle("GET /planhours", middlewareLog(plan.PlanHours(d.db)))
+	apiMux.Handle("GET /planrow", middlewareLog(plan.PlanRow(d.templates, d.db)))
+	apiMux.Handle("POST /planrow", middlewareLog(plan.NewPlanRow(d.db)))
+	apiMux.Handle("DELETE /planrow", middlewareLog(plan.DeleteRow(d.db)))
+	apiMux.Handle("PUT /planrow", middlewareLog(plan.UpdateRow(d.db)))
 
 	mux.Handle("/api/", http.StripPrefix("/api", apiMux))
 }

@@ -76,7 +76,7 @@ func GetCalendar(db *sql.DB, id int64) (Calendar, error) {
 func AllCalendars(db *sql.DB) ([]Calendar, error) {
 	var cals []Calendar
 
-	getQuery := `SELECT id,name,description FROM Calendar;`
+	getQuery := `SELECT id,name,description FROM Calendar ORDER BY name;`
 
 	rows, err := db.Query(getQuery)
 	if err != nil {

@@ -79,7 +79,7 @@ func GetIpt(db *sql.DB, id int64) (Ipt, error) {
 func AllIpts(db *sql.DB) ([]Ipt, error) {
 	var ipts []Ipt
 
-	getQuery := `SELECT id,name,description FROM Ipt;`
+	getQuery := `SELECT id,name,description FROM Ipt ORDER BY name;`
 
 	rows, err := db.Query(getQuery)
 	if err != nil {

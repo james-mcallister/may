@@ -133,7 +133,8 @@ func AllEmployees(db *sql.DB) ([]Employee, error) {
 	SELECT
 	  id,first_name,last_name,myid,empid,labor_capacity,
 	  desk,active,coverage_start,coverage_end,comp,reports_to,ipt
-	FROM Employee;
+	FROM Employee
+	ORDER BY last_name,first_name;
 	`
 
 	rows, err := db.Query(getQuery)

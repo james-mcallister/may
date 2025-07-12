@@ -13,8 +13,8 @@
                 <th>
                     <div class="select is-info">
                         <select>
-                            <option>Reset</option>
                             <option>Adjust</option>
+                            <option>Reset</option>
                         </select>
                     </div>
                 </th>
@@ -52,6 +52,7 @@
                     </div>
                 </td>
                 {{ range $.Months }}
+                <!-- $("tbody").find("button[data-fiscal-period='202501']"); then sum with .each -->
                 <td><button class="button is-fullwidth" data-evt="show-cal" data-start-date="{{ .StartDate }}" data-end-date="{{ .EndDate }}" data-fiscal-period="{{ .FiscalPeriod }}">0</button></td>
                 {{ end }}
             </tr>
@@ -61,7 +62,8 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>Cost</td>
+                <!-- $(".cost-total ~ td").text(); to update total cost on page -->
+                <td class="cost-total">Cost</td>
                 {{ range .Months }}
                 <td>0</td>
                 {{ end }}
@@ -71,7 +73,7 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>Hours</td>
+                <td class="hours-total">Hours</td>
                 {{ range .Months }}
                 <td>0</td>
                 {{ end }}
@@ -81,7 +83,7 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>FTE</td>
+                <td class="fte-total">FTE</td>
                 {{ range .Months }}
                 <td>0</td>
                 {{ end }}

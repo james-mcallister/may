@@ -97,7 +97,8 @@ func AllProjects(db *sql.DB) ([]Project, error) {
 	SELECT
 	  id,title,description,wbs_id,stmt_of_work,start_date,
 	  end_date,ims_uid,wad_line_id,evt,parent_project
-	FROM Project;
+	FROM Project
+	ORDER BY wbs_id;
 	`
 
 	rows, err := db.Query(getQuery)

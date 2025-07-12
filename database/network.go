@@ -89,7 +89,8 @@ func AllNetworks(db *sql.DB) ([]Network, error) {
 	getQuery := `
 	SELECT
 	  id,charge_number,title,description,status,start_date,end_date,proj
-	FROM Network;
+	FROM Network
+	ORDER BY charge_number;
 	`
 
 	rows, err := db.Query(getQuery)
