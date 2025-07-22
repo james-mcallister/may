@@ -1,4 +1,6 @@
 import Big from 'big.js';
+import { PlanRow, PlanTable } from './plan';
+import { init as msgInit, notify, showProgress, endProgress } from './messages';
 import 'bulma/css/bulma.css';
 import '@fortawesome/fontawesome-free/js/solid.js';
 import '@fortawesome/fontawesome-free/js/fontawesome.js';
@@ -14,9 +16,17 @@ Big.RM = Big.roundHalfUp; // rounding mode
 // ex: x = Big("10.555555555");
 // x.round(2) // 10.56
 
+const formatterUSD = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+});
+
+const formatNumber = new Intl.NumberFormat("en-US");
+
 $(function() {
     MainModule.init();
     NavModule.init();
+    msgInit();
 });
 
 function initNext(handler) {
@@ -56,17 +66,17 @@ const HomeModule = (function($) {
             dataType: "html",
             beforeSend: function(xhr) {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
             }
         }).done(function(markup) {
-            MainModule.endProgress();
+            endProgress();
             MainModule.setContent(markup);
             if (showNotify) {
-                MainModule.notify(nColor, msg);
+                notify(nColor, msg);
             }
         }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: /home/ ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: /home/ ${xhr.responseText}`);
         });
     }
 
@@ -88,50 +98,14 @@ const HomeModule = (function($) {
 const MainModule = (function($) {
     let ele = {};
 
-    function displayMessage(e, nColor, msg) {
-        e.stopPropagation();
-        e.preventDefault();
-        ele.notify.removeClass("is-hidden");
-        let markup = `
-        <div class="notification is-${nColor} is-light">${msg}</div>
-        `
-        
-        // 500ms animations with a 5 second delay between reveal and hide.
-        ele.notify.html(markup).slideDown(500, function() {
-          setTimeout(function() {
-            ele.notify.slideUp(500, function() {
-              ele.notify.empty();
-              ele.notify.addClass("is-hidden");
-            });
-          }, 5000);
-        });
-    }
-
-    function showProgress() {
-        let markup = `<progress class="progress is-small" max="100"></progress>`
-        ele.notify.html(markup);
-    }
-
-    function endProgress() {
-        ele.notify.empty();
-    }
-
     return {
         init() {
             ele.app = $("#app");
-            ele.notify = $("#notification");
-
-            ele.notify.on("may:notify", displayMessage);
         },
         setContent(content) {
             ele.app.empty();
             ele.app.append(content);
-        },
-        notify(nColor, msg) {
-            ele.notify.trigger("may:notify", [nColor, msg]);
-        },
-        showProgress,
-        endProgress
+        }
     }
 })(jQuery);
 
@@ -158,7 +132,7 @@ const NavModule = (function($) {
             MainModule.setContent(markup);
             initNext(handler);
         }).fail(function(xhr, status, err) {
-            MainModule.notify("danger", `request failure: ${route} ${xhr.responseText}`);
+            notify("danger", `request failure: ${route} ${xhr.responseText}`);
         });
     }
 
@@ -206,16 +180,16 @@ const EntityModule = (function($) {
             dataType: "html",
             beforeSend: function(xhr) {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
             }
         }).done(function(markup) {
-            MainModule.endProgress();
+            endProgress();
             teardown();
             MainModule.setContent(markup);
             initNext(handler);
         }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: /${ent}/${id}/ ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: /${ent}/${id}/ ${xhr.responseText}`);
         });
     }
 
@@ -295,7 +269,7 @@ const FormModule = (function($) {
         let ele = $(this);
         let valid = ele.get(0).checkValidity();
         if (!valid) {
-            MainModule.notify("danger", "invalid form fields");
+            notify("danger", "invalid form fields");
             ele.addClass("is-danger");
         } else {
             ele.removeClass("is-danger");
@@ -307,7 +281,7 @@ const FormModule = (function($) {
             let ele = $(this);
             let valid = ele.get(0).checkValidity();
             if (!valid) {
-                MainModule.notify("danger", "invalid form fields");
+                notify("danger", "invalid form fields");
                 ele.addClass("is-danger");
             } else {
                 ele.removeClass("is-danger");
@@ -316,6 +290,14 @@ const FormModule = (function($) {
 
         // delete button should be only element with is-danger class
         return $(".is-danger").length === 1;
+    }
+
+    function teardown() {
+        ele.btnClear.off("click", clearDropdown);
+        ele.btnDelete.off("click", handleDelete);
+        ele.btnCancel.off("click", handleCancel);
+        ele.btnSubmit.off("click", handleUpdate);
+        ele.form.off("blur", "input", checkValidField);
     }
 
     function makeRequest(url, reqMethod) {
@@ -327,17 +309,17 @@ const FormModule = (function($) {
             dataType: "text",
             beforeSend: function() {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
                 ele.fieldset.prop("disabled", true);
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             teardown();
             HomeModule.navHome("primary", res);
         }).fail(function(xhr, status, err) {
             ele.fieldset.prop("disabled", false);
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
@@ -364,13 +346,7 @@ const FormModule = (function($) {
                 ele.btnDelete.on("click", handleDelete);
             }
         },
-        teardown() {
-            ele.btnClear.off("click", clearDropdown);
-            ele.btnDelete.off("click", handleDelete);
-            ele.btnCancel.off("click", handleCancel);
-            ele.btnSubmit.off("click", handleUpdate);
-            ele.form.off("blur", "input", checkValidField);
-        }
+        teardown
     }
 })(jQuery);
 
@@ -401,7 +377,7 @@ const PlanFormModule = (function($) {
         let ele = $(this);
         let valid = ele.get(0).checkValidity();
         if (!valid) {
-            MainModule.notify("danger", "invalid form fields");
+            notify("danger", "invalid form fields");
             addErrorStyle(ele);
         } else {
             removeErrorStyle(ele);
@@ -414,7 +390,7 @@ const PlanFormModule = (function($) {
             let e = $(this);
             let valid = e.get(0).checkValidity();
             if (!valid) {
-                MainModule.notify("danger", "invalid form fields");
+                notify("danger", "invalid form fields");
                 addErrorStyle(e);
                 formValid = false;
             } else {
@@ -447,7 +423,7 @@ const PlanFormModule = (function($) {
         e.stopPropagation();
         e.preventDefault();
         if (!checkValidForm()) {
-            MainModule.notify("danger", `Invalid Form Data: check form fields`);
+            notify("danger", `Invalid Form Data: check form fields`);
             return
         }
         if (ele.newCheck.prop("checked")) {
@@ -461,7 +437,7 @@ const PlanFormModule = (function($) {
         e.stopPropagation();
         e.preventDefault();
         if (!checkValidForm()) {
-            MainModule.notify("danger", `Invalid Form Data: check form fields`);
+            notify("danger", `Invalid Form Data: check form fields`);
             return
         }
         reqPlanPage();
@@ -484,18 +460,18 @@ const PlanFormModule = (function($) {
             dataType: "html",
             beforeSend: function() {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
                 ele.fieldset.prop("disabled", true);
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             teardown();
             MainModule.setContent(res);
             PlanPage.init();
         }).fail(function(xhr, status, err) {
             ele.fieldset.prop("disabled", false);
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
@@ -507,18 +483,18 @@ const PlanFormModule = (function($) {
             dataType: "html",
             beforeSend: function() {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
                 ele.fieldset.prop("disabled", true);
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             teardown();
             MainModule.setContent(res);
             initForm();
         }).fail(function(xhr, status, err) {
             ele.fieldset.prop("disabled", false);
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
@@ -576,7 +552,7 @@ const PlanPage = (function($) {
         let c = $(this);
         let valid = c.get(0).checkValidity();
         if (!valid) {
-            MainModule.notify("danger", "invalid form fields");
+            notify("danger", "invalid form fields");
             addErrorStyle(c);
         } else {
             removeErrorStyle(c);
@@ -589,7 +565,7 @@ const PlanPage = (function($) {
             let e = $(this);
             let valid = e.get(0).checkValidity();
             if (!valid) {
-                MainModule.notify("danger", "invalid form fields");
+                notify("danger", "invalid form fields");
                 addErrorStyle(e);
                 formValid = false;
             } else {
@@ -621,9 +597,9 @@ const PlanPage = (function($) {
         removeErrorStyle(ele.targetHoursInput);
         try {
             let val = new Big(ele.targetHoursInput.val());
-            let total = new Big(ele.targetHours.text());
+            let total = new Big(ele.targetHours.data("val"));
             let delta = val.minus(total);
-            ele.targetHoursDelta.text(delta);
+            ele.targetHoursDelta.text(formatNumber.format(delta.toString()));
         } catch (e) {
             addErrorStyle(ele.targetHoursInput);
         }
@@ -633,9 +609,9 @@ const PlanPage = (function($) {
         removeErrorStyle(ele.targetCostInput);
         try {
             let val = new Big(ele.targetCostInput.val());
-            let total = new Big(ele.targetCost.text());
+            let total = new Big(ele.targetCost.data("val"));
             let delta = val.minus(total);
-            ele.targetCostDelta.text(delta);
+            ele.targetCostDelta.text(formatterUSD.format(delta));
         } catch (e) {
             addErrorStyle(ele.targetCostInput);
         }
@@ -663,23 +639,72 @@ const PlanPage = (function($) {
         // this would remove the need for a global variable
         ele.tabs.after(content);
 
-        // might need to await these two methods calls
+
         let c = ele.tabs.next();
-        // attach array of prodHours to table ele
-        getProdHours(c);
-        // attach lookup of cal_date: index to table ele
-        getProdHoursLookup(c);
+        let li = $("ul li").last();
+        initTableData(c, li);
+
         // setup event listeners on the table element
         setupTableEvents(c);
 
-        let li = $("ul li").last();
         li.data("content", c);
         li.trigger('click');
+    }
+
+    function initTableData(tableEle, listEle) {
+        let oldTab = currentTab;
+        let startDate = tableEle.data("pop-start");
+        let endDate = tableEle.data("pop-end");
+        let tableId = tableEle.data("plan-id");
+        let t = new PlanTable(tableId, startDate, endDate);
+        t.init().then(() => {
+            tableEle.data("tableData", t);
+        }).catch((err) => {
+            notify("danger", `initTableData error: ${err.message}`);
+            tableEle.remove();
+            listEle.remove();
+            if (oldTab) {
+                currentTab = oldTab;
+            } else {
+                currentTab = null;
+            }
+        });
     }
 
     function setupTableEvents(tableEle) {
         let startDate = tableEle.data("pop-start");
         let endDate = tableEle.data("pop-end");
+
+        tableEle.on("may:calc-totals", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (currentTab) {
+                let t = currentTab.data("content");
+                let tHead = t.find("thead");
+                let tBody = t.find("tbody");
+                let headBtns = tHead.find("button.col");
+                headBtns.each(function() {
+                    let cost = new Big(0);
+                    let hours = new Big(0);
+                    let fp = $(this).data("fiscal-period");
+                    let mHours = $(this).data("month-hours");
+                    let hBtns = tBody.find(`button.hours[data-fiscal-period="${fp}"]`);
+                    hBtns.each(function() {
+                        let btnHours = new Big($(this).text());
+                        let rate = $(this).parent().siblings("td.rate").text();
+                        let btnCost = btnHours.times(rate);
+                        hours = hours.plus(btnHours);
+                        cost = cost.plus(btnCost);
+                    });
+                    let fte = hours.div(mHours);
+                    tBody.find(`td.fte[data-fiscal-period="${fp}"]`).text(fte);
+                    tBody.find(`td.cost[data-fiscal-period="${fp}"]`).text(formatterUSD.format(cost));
+                    tBody.find(`td.cost[data-fiscal-period="${fp}"]`).data("val", cost);
+                    tBody.find(`td.hours[data-fiscal-period="${fp}"]`).text(formatNumber.format(hours.toString()));
+                    tBody.find(`td.hours[data-fiscal-period="${fp}"]`).data("val", hours);
+                });
+            }
+        });
 
         tableEle.on("click", "button", function(e) {
             e.preventDefault();
@@ -688,7 +713,7 @@ const PlanPage = (function($) {
             let evt = selectedEle.data("evt");
 
             if (!evt) {
-                MainModule.notify("danger", `internal server error: invalid event`);
+                notify("danger", `internal server error: invalid event`);
                 return
             }
 
@@ -704,60 +729,47 @@ const PlanPage = (function($) {
         });
     }
 
-    function handleAdjustRow(selectedEle, startDate, endDate) {
-        let url = "/api/newrow";
-        let planId = selectedEle.closest("tr").data("scope-id");
-        let empId = selectedEle.closest("tr").data("emp-id");
-        $.ajax({
-            url: url,
-            method: "GET",
-            dataType: "html",
-            beforeSend: function() {
-                MainModule.showProgress();
-            },
-        }).done(function(res) {
-            MainModule.endProgress();
-            if (currentTab) {
-                currentTab.data("content").addClass("is-hidden");
-            }
-            ele.tabs.addClass("is-hidden");
-            ele.tabs.before(res);
-            setupRowForm(planId, startDate, endDate);
-        }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
-        });
+    function calcTotals() {
+        if (currentTab) {
+            let t = currentTab.data("content");
+            t.trigger("may:calc-totals", []);
+
+            let costTotal = new Big(0);
+            t.find("td.cost").each(function() {
+                let colCost = $(this).data("val");
+                costTotal = costTotal.plus(colCost);
+            });
+            ele.targetCost.text(formatterUSD.format(costTotal));
+            ele.targetCost.data("val", costTotal);
+
+            let hoursTotal = new Big(0);
+            t.find("td.hours").each(function() {
+                let colHours = $(this).data("val");
+                hoursTotal = hoursTotal.plus(colHours);
+            });
+            ele.targetHours.text(formatNumber.format(hoursTotal.toString()));
+            ele.targetHours.data("val", hoursTotal);
+        }
     }
 
-    // TODO: save logic should save the plan hours for each row, and add the
-    // plan page id for load later. Since the plans and plan pages will be
-    // // many to many, need an association table
-    // function handleAdjustCol(selectedEle, startDate, endDate) {
-    //     let fiscalPeriod = selectedEle.data("fiscal-period");
-    //     if (!fiscalPeriod) {
-    //         MainModule.notify("danger", "invalid element selected");
-    //         return
-    //     }
-    //     let planId = selectedEle.closest("tr").data("scope-id");
-    //     let empId = selectedEle.closest("tr").data("emp-id");
-    //     let url = `/api/planrow?emp_id=${empId}&plan_id=${planId}`;
-    //     let hours = serializePlanHours(selectedEle);
-    //     $.ajax({
-    //         url: url,
-    //         method: "PUT",
-    //         contentType: "application/json",
-    //         data: JSON.stringify(hours),
-    //         beforeSend: function() {
-    //             MainModule.showProgress();
-    //         },
-    //     }).done(function(res) {
-    //         MainModule.endProgress();
-    //         ele.planPage.trigger("may:update-hours", [fiscalPeriod]);
-    //     }).fail(function(xhr, status, err) {
-    //         MainModule.endProgress();
-    //         MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
-    //     });
-    // }
+    function handleAdjustRow(selectedEle) {
+        let row = selectedEle.closest("tr");
+        let planId = row.data("scope-id");
+        let empId = row.data("emp-id");
+        let multiplier = row.find("input").val();
+
+        // loop over all buttons in the row and trigger update
+        let btns = $(`tr[data-emp-id='${empId}'][data-scope-id='${planId}'] button.hours`);
+        btns.each(function() {
+            let btn = $(this);
+            let fiscalPeriod = btn.data("fiscal-period");
+            let monthStart = btn.data("start-date");
+            let monthEnd = btn.data("end-date");
+            let selector = `tr[data-emp-id='${empId}'][data-scope-id='${planId}'] button[data-fiscal-period='${fiscalPeriod}']`;
+            ele.planPage.trigger("may:update-hours", [multiplier, selector, monthStart, monthEnd]);
+        });
+        calcTotals();
+    }
 
     function modalFormMarkup() {
         let markup = `
@@ -792,8 +804,9 @@ const PlanPage = (function($) {
             e.stopPropagation();
             let m = $("#hours-input").val();
             teardownHoursModal();
-            let selector = `button[data-fiscal-period='${fiscalPeriod}']`
+            let selector = `button[data-fiscal-period='${fiscalPeriod}']`;
             ele.planPage.trigger("may:update-hours", [m, selector, monthStart, monthEnd]);
+            calcTotals();
         });
         $("#close-modal, #btn-cancel-modal, .modal-background").on("click", function(e) {
             e.preventDefault();
@@ -827,10 +840,10 @@ const PlanPage = (function($) {
             method: "GET",
             dataType: "html",
             beforeSend: function() {
-                MainModule.showProgress();
+                showProgress();
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             if (currentTab) {
                 currentTab.data("content").addClass("is-hidden");
             }
@@ -838,8 +851,8 @@ const PlanPage = (function($) {
             ele.tabs.before(res);
             setupRowForm(planId, startDate, endDate);
         }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
@@ -851,41 +864,219 @@ const PlanPage = (function($) {
             url: url,
             method: "DELETE",
             beforeSend: function() {
-                MainModule.showProgress();
+                showProgress();
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             selectedEle.closest("tr").remove();
+            calcTotals();
         }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
     function handleShowCal(selectedEle, startDate, endDate) {
-        let url = "";
-        let planId = selectedEle.closest("tr").data("scope-id");
-        let empId = selectedEle.closest("tr").data("emp-id");
+        let url = "/evms/cal";
+        let fiscalPeriod = selectedEle.data("fiscal-period");
         $.ajax({
             url: url,
-            method: "DELETE",
+            method: "GET",
             data: {
                 "start_date": startDate,
                 "end_date": endDate,
-                "emp_id": empId,
-                "plan_id": planId
+                "fiscal_period": fiscalPeriod
             },
             dataType: "html",
             beforeSend: function() {
-                MainModule.showProgress();
+                showProgress();
             },
         }).done(function(res) {
-            MainModule.endProgress();
-            selectedEle.closest("tr").remove();
+            endProgress();
+            if (currentTab) {
+                currentTab.data("content").addClass("is-hidden");
+            }
+            ele.tabs.addClass("is-hidden");
+            ele.tabs.before(res);
+            setupCal(selectedEle);
         }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
+    }
+
+    function setupCal(selectedEle) {
+        let row = selectedEle.closest("tr").data("rowData");
+        let startDate = selectedEle.data("start-date");
+        let endDate = selectedEle.data("end-date");
+        let hours = currentTab.data("content").data("tableData").getPlanHours(startDate, endDate, row);
+        // skip disabled calendar tiles (needed to ensure correct planHours index)
+        let offset = 0;
+        $(".calendar-tile").find("input").each(function(i) {
+            let isDisabled = $(this).prop("disabled");
+            if (!isDisabled) {
+                let idx = i - offset;
+                $(this).val(hours[idx]);
+            } else {
+                offset++;
+            }
+        });
+
+        let slider = $("#capacity-slider");
+        let cap = $("#capacity-value");
+        slider.on("input", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let v = slider.val();
+            slider.data("val", v);
+            cap.text(formatAsPercentage(v));
+        });
+
+        let btnCalc = $("#btn-cal-calculate");
+        let calcControl = $("#calc-control");
+        btnCalc.on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let cap = slider.data("val") || "1";
+            let control = calcControl.val();
+            let tiles = $(".calendar-tile > p");
+            tiles.each(function() {
+                let prodHours = $(this).text();
+                let planHours = $(this).prev().val() || "0";
+                let newPlanHours = "error";
+                if (control === "adjust") {
+                    let adjustCap = addNumber(cap, "1.00");
+                    newPlanHours = multiplyNumber(planHours, adjustCap);
+                } else {
+                    newPlanHours = multiplyNumber(prodHours, cap);
+                }
+                $(this).prev().val(newPlanHours);
+            });
+        });
+  
+        calcControl.on("change", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let control = calcControl.val();
+            if (control === "adjust") {
+                slider.attr("min", "-1");
+            } else {
+                slider.attr("min", "0");
+                let v = parseFloat(slider.data("val"));
+                if (v && v < 0) {
+                    slider.data("val", "0");
+                    cap.text(formatAsPercentage("0"));
+                }
+            }
+        });
+
+        // TODO: save event should update planHours array
+        let btnSave = $("#btn-cal-save");
+        btnSave.on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let saved = saveHours(selectedEle);
+            if (saved) {
+                calcTotals();
+            }
+        });
+        // TODO: cancel should remove cal with no changes (teardown)
+        let btnCancel = $("#btn-cal-cancel");
+        btnCancel.on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            teardownCal();
+            calcTotals();
+        });
+        // TODO: prev should trigger the show cal event with previous fiscal period
+        let btnPrev = $("#btn-cal-prev");
+        btnPrev.on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let prevBtn = selectedEle.closest("td").prev().find("button.hours");
+            if (prevBtn.length !== 0) {
+                let t = currentTab.data("content");
+                let startDate = t.data("pop-start");
+                let endDate = t.data("pop-end");
+                let saved = saveHours(selectedEle);
+                if (saved) {
+                    handleShowCal(prevBtn, startDate, endDate);
+                }
+            }
+        });
+        // TODO: next should trigger the show cal event with next fiscal period
+        let btnNext = $("#btn-cal-next");
+        btnNext.on("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let nextBtn = selectedEle.closest("td").next().find("button.hours");
+            if (nextBtn.length !== 0) {
+                let t = currentTab.data("content");
+                let startDate = t.data("pop-start");
+                let endDate = t.data("pop-end");
+                let saved = saveHours(selectedEle);
+                if (saved) {
+                    handleShowCal(nextBtn, startDate, endDate);
+                }
+            }
+        });
+    }
+
+    function saveHours(selectedEle) {
+        let startDate = selectedEle.data("start-date");
+        let endDate = selectedEle.data("end-date");
+        let row = selectedEle.closest("tr").data("rowData");
+        let t = currentTab.data("content").data("tableData");
+        let vals = [];
+
+        $(".calendar-tile").find("input").each(function() {
+            let isDisabled = $(this).prop("disabled");
+            if (!isDisabled) {
+                let val = $(this).val();
+                vals.push(val);
+            }
+        });
+
+        try {
+            t.updatePlanHours(startDate, endDate, row, vals);
+            let s = t.sum(startDate, endDate, row);
+            selectedEle.text(s);
+            teardownCal();
+        } catch (e) {
+            notify("danger", `${e.message}`);
+            return false;
+        }
+        return true;
+    }
+
+    function addNumber(val1, val2) {
+        let v1 = new Big(val1);
+        let v2 = new Big(val2);
+        return v1.add(v2)
+    }
+
+    function multiplyNumber(val1, val2) {
+        let v1 = new Big(val1);
+        let v2 = new Big(val2);
+        return v1.times(v2)
+    }
+
+    function formatAsPercentage(number, minimumFractionDigits = 0, maximumFractionDigits = 2) {
+        const formatter = new Intl.NumberFormat('default', {
+            style: 'percent',
+            minimumFractionDigits,
+            maximumFractionDigits,
+        });
+        return formatter.format(number);
+    }
+
+    function teardownCal() {
+        $("#plan-cal").off();
+        $("#plan-cal").remove();
+        ele.tabs.removeClass("is-hidden");
+        if (currentTab) {
+            currentTab.data("content").removeClass("is-hidden");
+        }
     }
 
     function getTableRow(empId, planId, startDate, endDate) {
@@ -902,10 +1093,10 @@ const PlanPage = (function($) {
             dataType: "html",
             beforeSend: function() {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             teardownRowForm();
             $("#emp-multi-select").remove();
             ele.tabs.removeClass("is-hidden");
@@ -913,18 +1104,17 @@ const PlanPage = (function($) {
                 currentTab.data("content").removeClass("is-hidden");
                 currentTab.data("content").find("tbody").prepend(res);
                 let newRow = $(`tr[data-emp-id='${empId}'][data-scope-id='${planId}']`)
-                getPlanHours(newRow, startDate, endDate);
+                initRowData(newRow, startDate, endDate);
             }
         }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
+            endProgress();
             teardownRowForm();
             $("#emp-multi-select").remove();
             ele.tabs.removeClass("is-hidden");
             if (currentTab) {
                 currentTab.data("content").removeClass("is-hidden");
-                currentTab.data("content").find("tbody").prepend(res);
             }
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
@@ -960,6 +1150,12 @@ const PlanPage = (function($) {
         ele.btnPlanFormSubmit = $("#btn-add-employees");
         ele.btnPlanFormSubmit.on("click", function(e) {
             handleRowFormSubmit(e, planId, startDate, endDate);
+            teardownRowForm();
+            $("#emp-multi-select").remove();
+            ele.tabs.removeClass("is-hidden");
+            if (currentTab) {
+                currentTab.data("content").removeClass("is-hidden");
+            }
         });
         ele.btnPlanFormCancel = $("#btn-cancel-employees");
         ele.btnPlanFormCancel.on("click", function(e) {
@@ -990,8 +1186,8 @@ const PlanPage = (function($) {
         const res = await Promise.allSettled(rows);
         for (const r of res) {
             if (r.status === "rejected") {
-                MainModule.notify("danger", `error: ${r.reason.responseText}`);
-                return
+                notify("danger", `error: ${r.reason.responseText}`);
+                continue
             }
             getTableRow(r.value["emp_id"], r.value["plan_id"], startDate, endDate);
         }
@@ -1024,85 +1220,15 @@ const PlanPage = (function($) {
         ele.btnPlanFormSubmit.off("click", handlePlanFormSubmit);
     }
 
-    function getPlanHours(rowEle, startDate, endDate) {
-        let url = "/api/planhours";
+    function initRowData(rowEle, startDate, endDate) {
         let empId = rowEle.data("emp-id");
         let scopeId = rowEle.data("scope-id");
-        $.ajax({
-            url: url,
-            method: "GET",
-            data: {
-                "start_date": startDate,
-                "end_date": endDate,
-                "emp_id": empId,
-                "plan_id": scopeId
-            },
-            dataType: "json",
-            beforeSend: function() {
-                // show loading indication
-                MainModule.showProgress();
-            },
-        }).done(function(res) {
-            MainModule.endProgress();
-            //let planHours = new Map(Object.entries(res));
-            rowEle.data("planHours", res);
-        }).fail(function(xhr, status, err) {
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
-        });
-    }
-
-    function getProdHours(tableEle) {
-        let url = "/api/prodhours";
-        let startDate = tableEle.data("pop-start");
-        let endDate = tableEle.data("pop-end");
-        $.ajax({
-            url: url,
-            method: "GET",
-            data: {
-                "start_date": startDate,
-                "end_date": endDate
-            },
-            dataType: "json",
-            beforeSend: function() {
-                // show loading indication
-                MainModule.showProgress();
-            },
-        }).done(function(res) {
-            MainModule.endProgress();
-            let numDays = res.length;
-            tableEle.data("prodHours", res);
-            tableEle.data("numDays", numDays);
-        }).fail(function(xhr, status, err) {
-            //ele.fieldset.prop("disabled", false);
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
-        });
-    }
-
-    function getProdHoursLookup(tableEle) {
-        let url = "/api/prodhoursidx";
-        let startDate = tableEle.data("pop-start");
-        let endDate = tableEle.data("pop-end");
-        $.ajax({
-            url: url,
-            method: "GET",
-            data: {
-                "start_date": startDate,
-                "end_date": endDate
-            },
-            dataType: "json",
-            beforeSend: function() {
-                // show loading indication
-                MainModule.showProgress();
-            },
-        }).done(function(res) {
-            MainModule.endProgress();
-            tableEle.data("lookup", res);
-        }).fail(function(xhr, status, err) {
-            //ele.fieldset.prop("disabled", false);
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+        let r = new PlanRow(empId, scopeId);
+        r.init(startDate, endDate).then(() => {
+            rowEle.data("rowData", r);
+        }).catch((err) => {
+            notify("danger", `row init error: ${err.message}`);
+            rowEle.remove();
         });
     }
 
@@ -1114,10 +1240,10 @@ const PlanPage = (function($) {
             dataType: "html",
             beforeSend: function() {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             if (currentTab) {
                 currentTab.data("content").addClass("is-hidden");
             }
@@ -1126,8 +1252,8 @@ const PlanPage = (function($) {
             setupForm();
         }).fail(function(xhr, status, err) {
             //ele.fieldset.prop("disabled", false);
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
@@ -1148,6 +1274,9 @@ const PlanPage = (function($) {
         let form = ele.tabs.prev("div.container");
         form.remove();
         ele.tabs.removeClass("is-hidden");
+        if (currentTab) {
+            currentTab.data("content").removeClass("is-hidden");
+        }
     }
 
     function getNewPlan(tabname) {
@@ -1160,16 +1289,16 @@ const PlanPage = (function($) {
             dataType: "html",
             beforeSend: function() {
                 // show loading indication
-                MainModule.showProgress();
+                showProgress();
                 ele.fieldset.prop("disabled", true);
             },
         }).done(function(res) {
-            MainModule.endProgress();
+            endProgress();
             handleAddTab(tabname, res);
         }).fail(function(xhr, status, err) {
             ele.fieldset.prop("disabled", false);
-            MainModule.endProgress();
-            MainModule.notify("danger", `request failure: ${url} ${xhr.responseText}`);
+            endProgress();
+            notify("danger", `request failure: ${url} ${xhr.responseText}`);
         });
     }
 
@@ -1194,67 +1323,36 @@ const PlanPage = (function($) {
 
         try {
             let m = new Big(multiplier);
-            let tBody = currentTab.data("content").find("tbody");
-            let tHead = currentTab.data("content").find("thead");
+            let t = currentTab.data("content");
+            let tBody = t.find("tbody");
+            let tHead = t.find("thead");
+            let tData = t.data("tableData");
             let hoursOp = tHead.find("select").val();
             if (hoursOp === "Adjust") {
                 tBody.find(selector).each(function(i, e) {
                     let mul = m.plus("1.0");
-                    let val = $(this).text();
-                    let newVal = mul.times(val);
+                    let row = $(this).closest("tr").data("rowData");
+                    tData.adjustHours(mul, monthStart, monthEnd, row);
+                    let newVal = tData.sum(monthStart, monthEnd, row);
                     $(this).text(newVal.toString());
                 });
             } else if (hoursOp === "Reset") {
-                let hours = resetMonthHours(m, monthStart, monthEnd);
                 tBody.find(selector).each(function(i, e) {
-                    $(this).text(hours);
+                    let row = $(this).closest("tr").data("rowData");
+                    tData.resetHours(m, monthStart, monthEnd, row);
+                    let newVal = tData.sum(monthStart, monthEnd, row);
+                    $(this).text(newVal.toString());
                 });
             }
         } catch (e) {
+            // TODO: undecided if error should be ignored or displayed
             console.log(e);
             return
         }
     }
 
-    function resetMonthHours(multiplier, monthStart, monthEnd) {
-        let prodHours = currentTab.data("content").data("prodHours");
-        let lookup = currentTab.data("content").data("lookup");
-        let startIdx = getStartIndex(monthStart, lookup);
-        let endIdx = getEndIndex(monthEnd, lookup);
-        let count = endIdx - startIdx;
-        let newHours = new Big("0.0");
-
-        for (let i=0; i <= count; i++) {
-            let idx = startIdx + i;
-            let h = new Big(prodHours[idx]);
-            let newVal = h.times(multiplier);
-            newHours = newHours.plus(newVal);
-            console.log(`Iteration: ${i}, Index: ${idx}, Hours: ${h}, Multiplier: ${multiplier}, New Value: ${newVal}`);
-        }
-        console.log(newHours.toString());
-        return newHours.toString();
-    }
-
-    function getStartIndex(monthStart, lookup) {
-        // edge case where the beginning and end of the PoP might be after
-        // the month start date
-        let c = monthStart in lookup
-        if (!c) {
-            return 0; // first index
-        }
-        return lookup[monthStart];
-    }
-
-    function getEndIndex(monthEnd, lookup) {
-        // edge case where the beginning and end of the PoP might be after
-        // the month end date
-        let c = monthEnd in lookup
-        if (!c) {
-            let lookupLength = Object.keys(lookup).length;
-            console.log(lookupLength - 1);
-            return lookupLength - 1; // last index
-        }
-        return lookup[monthEnd];
+    function loadPlanTable() {
+        return
     }
 
     function init() {
@@ -1283,61 +1381,13 @@ const PlanPage = (function($) {
         ele.plannerTabs.on("click", "li", handleTabClick);
         ele.btnAdd.on("click", handleGetNewPlanForm);
         ele.planPage.on("may:update-hours", updateHours);
+        ele.btnLoad.on("click", loadPlanTable);
         currentTab = null;
     }
 
     function teardown() {
-        return
+        ele.planPage.off();
     }
-
-    function reqMarkup() {
-        // request for calendar page and main plan page
-        return
-    }
-
-    function reqHours() {
-        // request json object with prod/plan hours
-        return
-    }
-
-    function calcTotals() {
-        // custom event to 
-        return
-    }
-
-    // const served = `{"a":"1", "b":"2", "c":"3", "d":"4", "e":"5", "f":"6", "g":"7", "h":"8"}`;
-    // const data = JSON.parse(served);
-    // const keys = Object.keys(data).sort();
-
-    function* dateIt(startDate, endDate, data, keys) {
-        // data should be a map of "YYYY-MM-DD": <float>
-        // this is for iterating over a date range
-        // const keys = Object.keys(data).sort(); // need to move this out of the function
-        let max = keys.length;
-        let i = 0;
-        while (i < max) {
-            if (keys[i] === startDate) {
-                let j = i;
-                let v;
-                do {
-                    v = keys[j];
-                    yield data[v];
-                    j++;
-                } while(v !== endDate && j < max);
-                i = max;
-            }
-            i++;
-        }
-    }
-
-// const d = {"a": 1, "c": 2, "b": 3, "e": 4, "d": 5};
-// const it = dateIt("c", "e", d);
-// let result = it.next();
-// while(!result.done) {
-//   let v = result.value;
-//   console.log(v);
-//   result = it.next();
-// }
 
     return {
         init,

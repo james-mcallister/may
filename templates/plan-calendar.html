@@ -1,4 +1,4 @@
-<div class="container">
+<div id="plan-cal" class="container">
     <div class="level">
         <div class="level-left">
             <h2 class="level-item title is-size-2">{{ .Period }}</h2>
@@ -22,7 +22,7 @@
         {{ range $.Inner }}
         <div id="{{ (index $.Days $i).CalDate }}" class="column calendar-tile">
             <div class="panel is-info mb-0"><p class="panel-heading p-2 has-text-centered">{{ (index $.Days $i).DayNum }}</p></div>
-            <input class="input has-text-centered has-text-weight-bold is-size-3 py-6" type="text" value="0.0" {{ if (index $.Days $i).Disabled }}disabled{{ end }}/>
+            <input class="input has-text-centered has-text-weight-bold is-size-3 py-6" type="text" value="0" {{ if (index $.Days $i).Disabled }}disabled{{ end }}/>
             <p class="has-text-centered">{{ (index $.Days $i).ProdHours }}</p>
         </div>
         {{ $i = add $i 1 }}

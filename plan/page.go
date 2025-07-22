@@ -450,3 +450,63 @@ func UpdateRow(db *sql.DB) http.Handler {
 		w.WriteHeader(http.StatusOK)
 	})
 }
+
+func Calendar(t *template.Template, db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+
+		params := r.URL.Query()
+		popStart := params.Get("start_date")
+		popEnd := params.Get("end_date")
+		fiscalPeriod := params.Get("fiscal_period")
+
+		if !ValidateDateFormat(popStart) || !ValidateDateFormat(popEnd) {
+			http.Error(w, "Invalid query params: start/end date", http.StatusBadRequest)
+			return
+		}
+
+		if len(fiscalPeriod) != 6 {
+			http.Error(w, "Invalid query params: start/end date", http.StatusBadRequest)
+			return
+		}
+
+		data := database.NewCal()
+		data.Period = MonthDay(fiscalPeriod)
+		data.Days, err = database.GetCalData(db, popStart, popEnd, fiscalPeriod)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// init loop counters for template
+		numWeeks := len(data.Days) / 7
+		numDays := 7
+		data.Outer = make([]int, numWeeks)
+		data.Inner = make([]int, numDays)
+
+		if err = t.ExecuteTemplate(w, "plan-calendar.html", data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+}
+
+func MonthDay(fiscalPeriod string) string {
+	// fiscal period format is YYYYMM
+	y, m := fiscalPeriod[:4], fiscalPeriod[4:]
+	lookup := map[string]string{
+		"01": "January",
+		"02": "February",
+		"03": "March",
+		"04": "April",
+		"05": "May",
+		"06": "June",
+		"07": "July",
+		"08": "August",
+		"09": "September",
+		"10": "October",
+		"11": "November",
+		"12": "December",
+	}
+	return lookup[m] + " " + y
+}

@@ -21,7 +21,7 @@ func (p Plan) Init(db *sql.DB) error {
 	tableQuery := `
 	CREATE TABLE IF NOT EXISTS Plan (
 	    id INTEGER PRIMARY KEY,
-		name TEXT DEFAULT '',
+		name TEXT UNIQUE NOT NULL,
 		start_date TEXT DEFAULT '',
 		end_date TEXT DEFAULT '',
 		plan INTEGER,

@@ -20,7 +20,7 @@
                 </th>
                 {{ range .Months }}
                 <th>
-                    <button class="button is-text"  data-evt="adjust-col" data-start-date="{{ .StartDate }}" data-end-date="{{ .EndDate }}" data-fiscal-period="{{ .FiscalPeriod }}">
+                    <button class="button is-text col"  data-evt="adjust-col" data-start-date="{{ .StartDate }}" data-end-date="{{ .EndDate }}" data-fiscal-period="{{ .FiscalPeriod }}" data-month-hours="{{ .MonthHours }}">
                         {{ .DisplayName }}
                     </button>
                 </th>
@@ -28,7 +28,7 @@
             </tr>
         </thead>
         <tbody>
-            <!-- might just take this out and handle the rows separately -->
+            <!-- use a nested template here instead of the duplicate logic -->
             {{ range .EmpRows }}
             <tr data-emp-id="{{ .EmpId }}" data-scope-id="{{ .ScopeId }}">
                 <td>
@@ -38,7 +38,7 @@
                 </td>
                 <td>{{ .EmpName }}</td>
                 <td>{{ .ScopeName }}</td>
-                <td>{{ .LaborRate }}</td>
+                <td class="rate">{{ .LaborRate }}</td>
                 <td>
                     <div class="field has-addons">
                         <div class="control">
@@ -53,7 +53,7 @@
                 </td>
                 {{ range $.Months }}
                 <!-- $("tbody").find("button[data-fiscal-period='202501']"); then sum with .each -->
-                <td><button class="button is-fullwidth" data-evt="show-cal" data-start-date="{{ .StartDate }}" data-end-date="{{ .EndDate }}" data-fiscal-period="{{ .FiscalPeriod }}">0</button></td>
+                <td><button class="button is-fullwidth hours" data-evt="show-cal" data-start-date="{{ .StartDate }}" data-end-date="{{ .EndDate }}" data-fiscal-period="{{ .FiscalPeriod }}" data-month-hours="{{ .MonthHours }}">0</button></td>
                 {{ end }}
             </tr>
             {{ end }}
@@ -65,7 +65,7 @@
                 <!-- $(".cost-total ~ td").text(); to update total cost on page -->
                 <td class="cost-total">Cost</td>
                 {{ range .Months }}
-                <td>0</td>
+                <td class="cost" data-fiscal-period="{{ .FiscalPeriod }}" data-val="0">0</td>
                 {{ end }}
             </tr>
             <tr>
@@ -75,7 +75,7 @@
                 <td></td>
                 <td class="hours-total">Hours</td>
                 {{ range .Months }}
-                <td>0</td>
+                <td class="hours" data-fiscal-period="{{ .FiscalPeriod }}" data-val="0">0</td>
                 {{ end }}
             </tr>
             <tr>
@@ -85,7 +85,7 @@
                 <td></td>
                 <td class="fte-total">FTE</td>
                 {{ range .Months }}
-                <td>0</td>
+                <td class="fte" data-fiscal-period="{{ .FiscalPeriod }}" data-val="0">0</td>
                 {{ end }}
             </tr>
         </tbody>

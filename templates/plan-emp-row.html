@@ -7,7 +7,7 @@
     </td>
     <td>{{ .EmpName }}</td>
     <td>{{ .ScopeName }}</td>
-    <td>{{ .LaborRate }}</td>
+    <td class="rate">{{ .LaborRate }}</td>
     <td>
         <div class="field has-addons">
             <div class="control">
@@ -21,7 +21,7 @@
         </div>
     </td>
     {{ range .Months }}
-    <td><button class="button is-fullwidth" data-evt="show-cal" data-fiscal-period="{{ .FiscalPeriod }}">0</button></td>
+    <td><button class="button is-fullwidth hours" data-evt="show-cal" data-start-date="{{ .StartDate }}" data-end-date="{{ .EndDate }}" data-fiscal-period="{{ .FiscalPeriod }}" data-month-hours="{{ .MonthHours }}">0</button></td>
     {{ end }}
 </tr>
 {{ end }}

@@ -284,6 +284,7 @@ type PlanMonth struct {
 	StartDate    string
 	EndDate      string
 	DisplayName  string
+	MonthHours   float64
 }
 
 // the column name format is MMM-YYYY (ex: Oct-2024)
@@ -291,7 +292,7 @@ func GetPlanMonths(db *sql.DB, startDate, endDate string) ([]PlanMonth, error) {
 	var months []PlanMonth
 
 	q := `
-	SELECT fiscal_year,fiscal_month,fiscal_period,min(cal_date),max(cal_date)
+	SELECT fiscal_year,fiscal_month,fiscal_period,min(cal_date),max(cal_date),sum(productive_hours)
 	FROM CalendarHours
 	WHERE fiscal_period IN (
 	    SELECT DISTINCT fiscal_period
@@ -310,7 +311,7 @@ func GetPlanMonths(db *sql.DB, startDate, endDate string) ([]PlanMonth, error) {
 	for rows.Next() {
 		var fy, fm int
 		var month PlanMonth
-		if err := rows.Scan(&fy, &fm, &month.FiscalPeriod, &month.StartDate, &month.EndDate); err != nil {
+		if err := rows.Scan(&fy, &fm, &month.FiscalPeriod, &month.StartDate, &month.EndDate, &month.MonthHours); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, fmt.Errorf("error: no such row: %v", err)
 			}

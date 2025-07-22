@@ -1,0 +1,28 @@
+<div class="modal" id="modal-load-plan">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Load Plan</p>
+            <button class="delete" aria-label="close" id="close-modal"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="field">
+                <label class="label">Select a Plan</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select name="load_plan" id="select-plan" required>
+                            <option value="">Select a plan...</option>
+                            {{ range .Plans }}
+                            <option value="{{ .Id }}">{{ .Name }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" id="btn-submit-modal">Submit</button>
+            <button class="button" id="btn-cancel-modal">Cancel</button>
+        </footer>
+    </div>
+</div>

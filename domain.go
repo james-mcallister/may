@@ -106,6 +106,7 @@ func initRoutes(mux *http.ServeMux, logger *log.Logger, d Domain) {
 	evmsMux := http.NewServeMux()
 	evmsMux.Handle("POST /plan", middlewareLog(plan.NewPlanTable(d.templates, d.db)))
 	evmsMux.Handle("GET /plan", middlewareLog(plan.NewPlanForm(d.templates, d.db)))
+	evmsMux.Handle("GET /cal", middlewareLog(plan.Calendar(d.templates, d.db)))
 
 	mux.Handle("/evms/", http.StripPrefix("/evms", evmsMux))
 
